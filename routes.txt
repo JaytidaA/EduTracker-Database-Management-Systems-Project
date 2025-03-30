@@ -1,5 +1,5 @@
 /signup
-/signin
+/login
 /home
 /courses
 /attendance/:course

@@ -5,14 +5,14 @@ const bcrypt = require('bcrypt')
 const db = require('../db/database.js')
 
 function signupGetController (req, res) {
-	res.json({ message: 'Signup page reached' })
+	res.json({ success: true, message: 'Signup page reached' })
 }
 
 function signupPostController (req, res) {
-	res.json({ message: 'Need to be admin to access this route' })
+	res.json({ success: true, message: 'Need to be admin to access this route' })
 }
 
 module.exports = {
 	get: signupGetController,
-	put: signupPostController
+	post: signupPostController
 }

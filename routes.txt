@@ -1,6 +1,5 @@
 /signup
 /login
 /home
-/courses
 /attendance/:course
 /mark

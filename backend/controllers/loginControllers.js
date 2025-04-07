@@ -1,14 +1,14 @@
 const path = require('path')
 const bcrypt = require('bcrypt')
 
-const { accountLogin } = require('../models/accounts.js')
+const { accountRetrieval } = require('../models/accounts.js')
 
 function loginGetController (req, res) {
 	res.json({ success: true, message: 'Login page reached' })
 }
 
 async function loginPostController (req, res) {
-	const { ID, username, password, role } = req.query;
+	const { ID, username, password, role } = req.body;
 
 	if (!ID || !role) {
 		res.json({ success: false, message: 'ID and role required!' })
@@ -17,7 +17,7 @@ async function loginPostController (req, res) {
 	}
 
 	try {
-		const account = await accountLogin(ID, role);
+		const account = await accountRetrieval(ID, role);
 
 		if (!account) {
 			return res.status(404).json({ success: false, message: 'Account not found' });
@@ -27,7 +27,7 @@ async function loginPostController (req, res) {
 	      return res.status(401).json({ success: false, message: 'Username does not match' });
     	}
 
-		const match = await bcrypt.compare(password, account.password);
+		const match = await bcrypt.compare(password, account.passwordHash);
 		
 		if (!match) {
 			return res.status(401).json({ success: false, message: 'Password does not match' });

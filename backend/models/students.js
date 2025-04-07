@@ -17,11 +17,12 @@ function studentData (ID) {
 function studentCoursesData(ID) {
 	return new Promise ((resolve, reject) => {
 		const sql = `
-			SELECT c.ID, c.courseName, d.depName
+			SELECT c.ID, c.courseName, d.depName, f.facName
 			FROM Course c
 			JOIN Enrolls e ON c.ID = e.course_ID
 			JOIN Student s ON e.student_ID = s.ID
 			JOIN Department d ON c.dep_ID = d.ID
+			JOIN Faculty f ON c.fac_ID = f.ID
 			WHERE s.ID = ?;
 		`
 

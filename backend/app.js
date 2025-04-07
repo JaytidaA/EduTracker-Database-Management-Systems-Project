@@ -5,10 +5,16 @@ const { PORT } = require('./config/config.js')
 
 const routes = require('./routes/routeIndex.js')
 
+app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+const loggers = require('./middleware/logging.js')
+
+app.use(loggers.request)
+app.use(loggers.ipv4)
+
 app.get('/', (req, res) => {
-	res.send("<h1>Hello World</h1>");
+	res.send("<h1>EduTracker: Tracking your Attendance</h1>");
 })
 
 app.use('/signup', routes.routeSignup)

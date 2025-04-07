@@ -29,7 +29,7 @@ export default class Home extends Component {
 
         <View style={{flex:0,flexDirection:'row',justifyContent:'center',alignItems:'center',gap:10,width:'100%',height:'23%' ,backgroundColor:'purple',gap:23}}>
         <View style={{width:70,height:70,borderRadius:50,backgroundColor:'green',left:-20}}></View>
-        <Text style={{color:'white', fontSize:33,fontWeight:600}}>Student</Text>
+        <Text style={{color:'white', fontSize:33,fontWeight:600}} onPress={()=>navigation.navigate('HomePage')}>Student</Text>
         </View>
 
         <Text style={{fontSize:20,fontWeight:400}}>Already have an account? Log in</Text>

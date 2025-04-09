@@ -9,6 +9,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 const loggers = require('./middleware/logging.js')
+const auth = require('./middleware/authorisation.js')
 
 app.use(loggers.request)
 app.use(loggers.ipv4)
@@ -19,8 +20,8 @@ app.get('/', (req, res) => {
 
 app.use('/signup', routes.routeSignup)
 app.use('/login', routes.routeLogin)
-app.use('/home', routes.routeHome)
-app.use('/mark', routes.routeMark)
+app.use('/home', auth.jwt, routes.routeHome)
+app.use('/mark', auth.jwt, routes.routeMark)
 
 module.exports = {
 	app: app,

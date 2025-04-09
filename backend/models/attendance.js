@@ -4,7 +4,7 @@ const db = require('../db/database.js')
 
 function attendanceData(studentID, courseID) {
 	return new Promise ((resolve, reject) => {
-		const sql = 'SELECT * FROM Course WHERE (student_ID = ? AND course_ID = ?)'
+		const sql = 'SELECT * FROM Attendance WHERE (student_ID = ? AND course_ID = ?)'
 		const params = [studentID, courseID]
 
 		db.all(sql, params, (err, rows) => {

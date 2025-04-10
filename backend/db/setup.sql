@@ -24,14 +24,16 @@ CREATE TABLE IF NOT EXISTS Attendance (
 	attendStatus CHAR (1),
 	course_ID INTEGER REFERENCES Course(ID),
 	student_ID INTEGER REFERENCES Student(ID),
+	lecture_Number INTEGER REFERENCES Lectures(lectureNumber),
 
-	PRIMARY KEY (attendDate, student_ID, course_ID)
+	PRIMARY KEY (attendDate, student_ID, course_ID, lecture_Number)
 );
 
 CREATE TABLE IF NOT EXISTS Course (
 	ID INTEGER PRIMARY KEY,
 	courseName VARCHAR (50),
 	courseCredits INTEGER,
+	courseCode VARCHAR (50),
 	year INTEGER,
 	dep_ID INTEGER REFERENCES Department(ID),
 	fac_ID INTEGER REFERENCES Faculty(ID)
@@ -53,4 +55,12 @@ CREATE TABLE IF NOT EXISTS Account (
 	role TEXT CHECK (role IN ('student', 'faculty')) NOT NULL,
 
 	PRIMARY KEY (ID, role)
+);
+
+CREATE TABLE IF NOT EXISTS Lectures (
+	course_ID INTEGER REFERENCES Course(ID),
+	lectureDate DATE,
+	lectureNumber INTEGER DEFAULT 1,
+
+	PRIMARY KEY (course_ID, lectureDate, lectureNumber)
 );

@@ -1,37 +1,34 @@
-const path = require('path');
-
-const { studentData, studentCoursesData } = require('../models/students.js')
-const { facultyData, facultyCoursesData } = require('../models/faculty.js')
-const { attendanceData } = require('../models/attendance.js')
+const { lectureData, attendanceData } = require('../models/attendance.js')
+const { courseData } = require('../models/courses.js')
 
 async function attendanceGetController (req, res) {
-	const { ID, role, courseID } = req.query;
+	const { ID, role } = req.jwtUser;
+	const courseID = req.params.cID;
 
 	if (!ID || !role || !courseID) {
-		return res.json({ success: false, message: 'ID, role and Course ID required!' })
+		return res.json({ success: false, message: 'ID, role and courseID required!' });
 	}
 
 	if (role != 'student') {
-		return res.json({ success: false, message: 'Invalid role provided!' })
+		return res.json({ success: false, message: 'Attendance is only marked for student!' });
 	}
 
-	try {
-		const attendances = await attendanceData(ID, courseID);
-
-		if (attendances.length == 0) {
-			return res.json({ success: true, message: 'Student has not attended a single lecture 💀' });
-		}
-
-		return res.json({
-			success: true,
-			attendanceData:...attendances
-		})
-	} catch (err) {
-		console.error('Error while accessing home page in:', err.message || err);
-		res.status(500).json({ success: false, message: 'Internal Server Error' });
+	const course = await courseData(courseID);
+	if (!course) {
+		return res.status(404).json({ success: false, message: 'Course not found!' });
 	}
+
+	const lectures = await lectureData(courseID);
+	const attendance = await attendanceData(ID, courseID);
+
+	res.json({
+		success: true,
+		courseInfo: course,
+		lectureInfo: lectures,
+		attendanceInfo: attendance
+	})
 }
 
 module.exports = {
-	get: homeGetController
-}
+	get: attendanceGetController
+};

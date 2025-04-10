@@ -331,7 +331,8 @@ import { AuthProvider, useAuth } from './src/AuthContext';
 import { useState } from 'react';
 // import { AuthProvider, useAuth } from './src/path/to/AuthProvider';
 // import {AuthProvider, useAuth  }  from './src/AuthContext'
-
+import AdminScreen from './src/screens/AdminScreen';
+import AddStudentScreen from './src/screens/Student/StudentScreen';
 const Stack = createNativeStackNavigator();
 
 const AppStack = () => {
@@ -350,6 +351,8 @@ const AppStack = () => {
 const AuthStack = () => {
   return (
     <Stack.Navigator>
+      {/* <Stack.Screen name="AdminScreen" component={AdminScreen} />  */}
+      {/* <Stack.Screen name="AddStudent" component={AddStudentScreen} /> */}
       <Stack.Screen name="HomePage" component={HomePage} />
       <Stack.Screen name="TeacherSignUp" component={TeacherSignUp} />
       {/* <Stack.Screen name="StudentSignUp" component={StudentSignUp} /> */}

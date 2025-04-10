@@ -1,10 +1,11 @@
 const path = require('path');
+const jwt = require('jsonwebtoken');
 
 const { studentData, studentCoursesData } = require('../models/students.js')
 const { facultyData, facultyCoursesData } = require('../models/faculty.js')
 
 async function homeGetController (req, res) {
-	const { ID, role } = req.query;
+	const { ID, role } = req.jwtUser;
 
 	if (!ID || !role) {
 		return res.json({ success: false, message: 'ID and role required!' })

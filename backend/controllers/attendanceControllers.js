@@ -1,9 +1,9 @@
-const { attendanceData } = require('../models/attendance.js')
+const { lectureData, attendanceData } = require('../models/attendance.js')
 const { courseData } = require('../models/courses.js')
 
 async function attendanceGetController (req, res) {
 	const { ID, role } = req.jwtUser;
-	const courseID = req.params.id;
+	const courseID = req.params.cID;
 
 	if (!ID || !role || !courseID) {
 		return res.json({ success: false, message: 'ID, role and courseID required!' });
@@ -18,11 +18,13 @@ async function attendanceGetController (req, res) {
 		return res.status(404).json({ success: false, message: 'Course not found!' });
 	}
 
+	const lectures = await lectureData(courseID);
 	const attendance = await attendanceData(ID, courseID);
 
 	res.json({
 		success: true,
-		lecturesAttended: attendance.length,
+		courseInfo: course,
+		lectureInfo: lectures,
 		attendanceInfo: attendance
 	})
 }

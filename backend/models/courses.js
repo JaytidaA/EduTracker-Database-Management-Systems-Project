@@ -15,5 +15,5 @@ function courseData(ID) {
 }
 
 module.exports = {
-	courseData,
+	courseData
 };

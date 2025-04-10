@@ -39,8 +39,10 @@ async function accountSignup (username, ID, password, role) {
 		
 	if (userExists && !accountExists) {
 		// Create an account
-		const sql = `INSERT INTO Account (ID, username, passwordHash, role)
-			VALUES (?, ?, ?, ?)`;
+		const sql = `
+			INSERT INTO Account (ID, username, passwordHash, role)
+			VALUES (?, ?, ?, ?)
+		`;
 		const params = [ID, username, password, role];
 
 		return new Promise ((resolve, reject) => {

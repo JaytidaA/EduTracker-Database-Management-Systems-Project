@@ -22,3 +22,8 @@ VALUES
 (1, CURRENT_DATE, 1),
 (1, CURRENT_DATE, 2),
 (1, DATE('now', '-1 day'), 1);
+
+INSERT OR IGNORE INTO Attendance (attendDate, attendStatus, course_ID, student_ID, lecture_Number)
+VALUES
+(CURRENT_DATE, 'a', 1, 1, 1),
+(CURRENT_DATE, 'p', 1, 1, 2);

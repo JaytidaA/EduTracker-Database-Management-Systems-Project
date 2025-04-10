@@ -24,8 +24,9 @@ CREATE TABLE IF NOT EXISTS Attendance (
 	attendStatus CHAR (1),
 	course_ID INTEGER REFERENCES Course(ID),
 	student_ID INTEGER REFERENCES Student(ID),
+	lecture_Number INTEGER REFERENCES Lectures(lectureNumber),
 
-	PRIMARY KEY (attendDate, student_ID, course_ID)
+	PRIMARY KEY (attendDate, student_ID, course_ID, lecture_Number)
 );
 
 CREATE TABLE IF NOT EXISTS Course (

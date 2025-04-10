@@ -488,7 +488,7 @@ import { useAuth } from '../AuthContext';
 const LogIn = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { setIsAuthenticated } = useAuth();
   const [userRole, setUserRole] = useState('student'); // Default to student
   const [userID, setUserID] = useState(''); // Added for ID field
@@ -639,10 +639,21 @@ const LogIn = ({ navigation }) => {
           <View style={styles.registerContainer}>
             <Text style={styles.registerText}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => {
-              if(userRole === 'student'){
-                navigation.navigate('StudentSignUp');
-              } else {
+              // if(userRole === 'student'){
+              //   navigation.navigate('StudentSignUp');
+              // } else {
+              //   navigation.navigate('TeacherSignUp');
+              // }
+
+              if(userRole==='faculty'){
                 navigation.navigate('TeacherSignUp');
+              }
+              else{
+                Alert.alert(
+                  "Access Restricted",
+                  "You don’t have an account. The admin will create your account.",
+                  [{ text: "OK" }]
+                );
               }
             }}>
               <Text style={styles.registerLink}>Register</Text>

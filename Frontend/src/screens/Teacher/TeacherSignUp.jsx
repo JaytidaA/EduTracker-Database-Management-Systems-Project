@@ -120,17 +120,18 @@
 
 
 import React, { Component } from 'react';
-import { 
-  Text, 
-  View, 
-  StyleSheet, 
-  Image, 
-  TextInput, 
-  TouchableOpacity, 
-  SafeAreaView, 
-  KeyboardAvoidingView, 
+import {
+  Text,
+  View,
+  StyleSheet,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  SafeAreaView,
+  KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
+  Alert
 } from 'react-native';
 
 export default class TeacherSignUp extends Component {
@@ -138,8 +139,11 @@ export default class TeacherSignUp extends Component {
     name: '',
     subject: '',
     email: '',
+    phone: '',
+    admin: '',
     password: '',
-    isPasswordVisible: false
+    confirmPassword: '',
+    isPasswordVisible: false,
   };
 
   render() {
@@ -150,143 +154,133 @@ export default class TeacherSignUp extends Component {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardAvoid}
         >
-          <ScrollView 
+          <ScrollView
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* Header with Logo */}
             <View style={styles.header}>
-              <Image 
-                source={{uri: "https://res.cloudinary.com/dsctxyrvw/image/upload/v1743089371/image_6_mjlkbn.png"}} 
-                style={styles.logo} 
+              <Image
+                source={{
+                  uri: "https://res.cloudinary.com/dsctxyrvw/image/upload/v1743089371/image_6_mjlkbn.png"
+                }}
+                style={styles.logo}
               />
               <Text style={styles.title}>Teacher Sign Up</Text>
               <Text style={styles.subtitle}>Create your account to get started</Text>
             </View>
 
-            {/* Form Container */}
             <View style={styles.formContainer}>
-              {/* Input Fields with Icons */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Teacher's name</Text>
-                <View style={styles.inputWrapper}>
-                  <TextInput 
-                    style={styles.input} 
-                    placeholder="Enter your full name" 
-                    value={this.state.name}
-                    onChangeText={(text) => this.setState({ name: text })}
-                  />
-                </View>
+                <Text style={styles.label}>Teacher's Name</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your full name"
+                  value={this.state.name}
+                  onChangeText={(text) => this.setState({ name: text })}
+                />
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>ID</Text>
-                <View style={styles.inputWrapper}>
-                  <TextInput 
-                    style={styles.input} 
-                    placeholder="What is your ID ?" 
-                    value={this.state.subject}
-                    onChangeText={(text) => this.setState({ subject: text })}
-                  />
-                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="What is your ID?"
+                  value={this.state.subject}
+                  onChangeText={(text) => this.setState({ subject: text })}
+                />
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Email</Text>
-                <View style={styles.inputWrapper}>
-                  <TextInput 
-                    style={styles.input} 
-                    placeholder="Enter your email address" 
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    value={this.state.email}
-                    onChangeText={(text) => this.setState({ email: text })}
-                  />
-                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your email address"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={this.state.email}
+                  onChangeText={(text) => this.setState({ email: text })}
+                />
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Phone</Text>
-                <View style={styles.inputWrapper}>
-                  <TextInput 
-                    style={styles.input} 
-                    placeholder="Are you an admin ?" 
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    value={this.state.phone}
-                    onChangeText={(text) => this.setState({ email: text })}
-                  />
-                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your phone number"
+                  keyboardType="phone-pad"
+                  value={this.state.phone}
+                  onChangeText={(text) => this.setState({ phone: text })}
+                />
               </View>
 
-              
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Admin</Text>
-                <View style={styles.inputWrapper}>
-                  <TextInput 
-                    style={styles.input} 
-                    placeholder="Are you an admin ?" 
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    value={this.state.admin}
-                    onChangeText={(text) => this.setState({ email: text })}
-                  />
-                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Are you an admin?"
+                  value={this.state.admin}
+                  onChangeText={(text) => this.setState({ admin: text })}
+                />
               </View>
 
+              {/* Password */}
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Password</Text>
                 <View style={styles.inputWrapper}>
-                  <TextInput 
-                    style={styles.input} 
-                    placeholder="Create a strong password" 
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Create a strong password"
                     secureTextEntry={!this.state.isPasswordVisible}
                     value={this.state.password}
                     onChangeText={(text) => this.setState({ password: text })}
                   />
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={styles.eyeIcon}
-                    onPress={() => this.setState({ isPasswordVisible: !this.state.isPasswordVisible })}
+                    onPress={() =>
+                      this.setState({ isPasswordVisible: !this.state.isPasswordVisible })
+                    }
                   >
                     <Text>{this.state.isPasswordVisible ? '👁️' : '👁️‍🗨️'}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
 
-              {/* Forgot Password */}
+              {/* Confirm Password */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Confirm Password</Text>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Re-enter your password"
+                    secureTextEntry={!this.state.isPasswordVisible}
+                    value={this.state.confirmPassword}
+                    onChangeText={(text) => this.setState({ confirmPassword: text })}
+                  />
+                </View>
+              </View>
+
               <TouchableOpacity style={styles.forgotPasswordContainer}>
                 <Text style={styles.forgotPassword}>Forgot Password?</Text>
               </TouchableOpacity>
 
-              {/* Sign-Up Button */}
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.signUpButton}
-                onPress={() => navigation.navigate("TeacherGenerateQr")}
+                onPress={() => {
+                  const { password, confirmPassword } = this.state;
+                  if (password !== confirmPassword) {
+                    Alert.alert("Error", "Passwords do not match");
+                    return;
+                  }
+                  navigation.navigate("TeacherGenerateQr");
+                }}
               >
                 <Text style={styles.signUpText}>Create Account</Text>
               </TouchableOpacity>
 
-              {/* Divider */}
-              {/* <View style={styles.divider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or</Text>
-                <View style={styles.dividerLine} />
-              </View> */}
-
-              {/* Google Sign-In Button */}
-              {/* <TouchableOpacity style={styles.googleButton}>
-                <Image 
-                  source={{uri: "https://tse2.mm.bing.net/th?id=OIP.3Hg4QqMapQoM8GGWqAGcxQHaHa&pid=Api&P=0&h=180"}} 
-                  style={styles.googleIcon} 
-                />
-                <Text style={styles.googleText}>Continue with Google</Text>
-              </TouchableOpacity> */}
-
-              {/* Already have account */}
               <View style={styles.signInPrompt}>
-                <Text style={styles.signInText}>Already have an account? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate("TeacherLogin")}>
-                  <Text style={styles.signInLink} onPress={()=>navigation.navigate("LogIn")}>Sign In</Text>
+                <Text style={styles.signInText}>Already have an account?</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('LogIn')}>
+                  <Text style={styles.signInLink}> Sign In</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -298,17 +292,9 @@ export default class TeacherSignUp extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  keyboardAvoid: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 30,
-  },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  keyboardAvoid: { flex: 1 },
+  scrollContent: { flexGrow: 1, paddingBottom: 30 },
   header: {
     alignItems: 'center',
     paddingTop: 20,
@@ -335,109 +321,64 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   inputGroup: {
-    // marginBottom: 18,
-    marginBottom: 11,
+    marginBottom: 14,
   },
   label: {
     fontSize: 16,
     fontWeight: '600',
+    marginBottom: 5,
     color: '#333',
-    marginBottom: 8,
+  },
+  input: {
+    width: '100%',
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    backgroundColor: '#f5f5f5',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f7f8fa',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e1e4e8',
-    // height: 54,
-    height: 50,
-  },
-  input: {
-    flex: 1,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#333',
+    position: 'relative',
   },
   eyeIcon: {
-    padding: 10,
-    marginRight: 5,
+    position: 'absolute',
+    right: 15,
   },
   forgotPasswordContainer: {
     alignItems: 'flex-end',
+    marginTop: 5,
     marginBottom: 20,
   },
   forgotPassword: {
     fontSize: 14,
-    color: '#4a65ff',
-    fontWeight: '500',
+    color: '#007BFF',
   },
   signUpButton: {
-    backgroundColor: '#4a65ff',
-    borderRadius: 12,
-    height: 55,
+    backgroundColor: '#0000ff',
+    paddingVertical: 12,
+    borderRadius: 10,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 5,
   },
   signUpText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#e1e4e8',
-  },
-  dividerText: {
-    paddingHorizontal: 15,
-    color: '#666',
-  },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e1e4e8',
-    height: 55,
-    marginBottom: 20,
-  },
-  googleIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 10,
-  },
-  googleText: {
+    color: '#fff',
     fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
+    fontWeight: 'bold',
   },
   signInPrompt: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 10,
+    marginTop: 20,
   },
   signInText: {
-    color: '#666',
-    fontSize: 15,
+    fontSize: 14,
+    color: '#333',
   },
   signInLink: {
-    color: '#4a65ff',
-    fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: 14,
+    color: '#007BFF',
+    fontWeight: '600',
   },
 });

@@ -350,11 +350,12 @@ const AppStack = () => {
 const AuthStack = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="StudentAttendanceComponent" component={StudentAttendanceComponent} />
-      <Stack.Screen name="TeacherAttendanceCompnent" component={TeacherAttendanceComponent}/>
-      <Stack.Screen name="LogIn" component={LogIn} />
+      <Stack.Screen name="HomePage" component={HomePage} />
       <Stack.Screen name="TeacherSignUp" component={TeacherSignUp} />
-      <Stack.Screen name="StudentSignUp" component={StudentSignUp} />
+      {/* <Stack.Screen name="StudentSignUp" component={StudentSignUp} /> */}
+      <Stack.Screen name="TeacherAttendanceCompnent" component={TeacherAttendanceComponent}/>
+      <Stack.Screen name="StudentAttendanceComponent" component={StudentAttendanceComponent} />
+      <Stack.Screen name="LogIn" component={LogIn} />
     </Stack.Navigator>
   );
 };

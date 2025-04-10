@@ -511,7 +511,7 @@ const HomePage = ({navigation}) => {
           setUserRole(storedUserRole);
         } else {
           setIsAuthenticated(false);
-          navigation.replace('LoginPage'); // Redirect to login if not authenticated
+          navigation.replace('LogIn'); // Redirect to login if not authenticated
         }
         console.log("Auth state on load:", value);
       } catch (error) {
@@ -558,7 +558,7 @@ const HomePage = ({navigation}) => {
       await AsyncStorage.removeItem("userRole");
       setIsAuthenticated(false);
       console.log("Logged out successfully");
-      navigation.replace('LoginPage');
+      navigation.replace('LogIn');
     } catch (error) {
       console.error("Error during logout:", error);
     }

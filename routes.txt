@@ -1,6 +1,9 @@
 /signup
 /login
 /home
+<<<<<<< HEAD
 /courses
+=======
+>>>>>>> d1fe81979b7ca821081b1567008bd8871371c875
 /attendance/:course
 /mark

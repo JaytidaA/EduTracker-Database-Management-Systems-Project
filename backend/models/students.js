@@ -35,7 +35,26 @@ function studentCoursesData(ID) {
 	});
 }
 
+function addStudent(ID, name, email, phone, dep_ID) {
+	return new Promise ((resolve, reject) => {
+		const sql = `
+			INSERT OR IGNORE INTO Student (ID, name, email, phone, dep_ID)
+			VALUES (?, ?, ?, ?, ?);
+		`
+		const params = [ID, name, email, phone, dep_ID];
+
+		db.run(sql, params, (err) => {
+			if (err) return reject(err);
+			else {
+				console.log(`Successfully added Student (${ID}: ${name})`);
+				resolve();
+			}
+		});
+	});
+}
+
 module.exports = {
 	studentData,
-	studentCoursesData
+	studentCoursesData,
+	addStudent
 };

@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS Faculty (
 	facName VARCHAR (100),
 	facEmail VARCHAR (100) UNIQUE,
 	facIsAdmin BOOLEAN,
+	facPhone VARCHAR (20) UNIQUE,
 	dep_ID INTEGER REFERENCES Department(ID)
 );
 

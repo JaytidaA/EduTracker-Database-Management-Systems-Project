@@ -35,7 +35,7 @@ function facultyCoursesData(ID) {
 function addFaculty (ID, name, email, isAdmin, phone, dep_ID) {
 	return new Promise ((resolve, reject) => {
 		const sql = `
-			INSERT OR IGNORE INTO Faculty (ID, faceName, facEmail, facIsAdmin, facPhone, dep_ID)
+			INSERT OR IGNORE INTO Faculty (ID, facName, facEmail, facIsAdmin, facPhone, dep_ID)
 			VALUES (?, ?, ?, ?, ?, ?);
 		`
 		const params = [ID, name, email, isAdmin, phone, dep_ID];

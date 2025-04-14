@@ -13,7 +13,6 @@ function departmentData (ID) { return new Promise ((resolve, reject) => {
 	});
 }
 
-
 module.exports = {
 	departmentData
 };

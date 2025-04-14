@@ -18,7 +18,10 @@ async function homeGetController (req, res) {
 	try {
 		if (role == 'student') {
 			const student = await studentData(ID);
+			// console.log(studentCourses);
 			const studentCourses = await studentCoursesData(ID);
+			// console.log(studentCourses);
+
 
 			if (!student) {
 				return res.status(404).json({ success: false, message: 'Student not found!' });

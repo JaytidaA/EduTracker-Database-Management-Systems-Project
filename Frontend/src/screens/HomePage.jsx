@@ -713,7 +713,7 @@ const HomePage = ({navigation}) => {
           {userRole === 'student' && (
             <TouchableOpacity
               style={styles.addCourseButton}
-              onPress={() => navigation.navigate('CourseCatalogPage')}
+              onPress={() => navigation.navigate('CourseDetailPage')}
             >
               <Text style={styles.addCourseButtonText}>+ Add New Course</Text>
             </TouchableOpacity>
@@ -724,7 +724,7 @@ const HomePage = ({navigation}) => {
             <View style={styles.linksGrid}>
               <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('CourseCatalogPage')}>
                 <Text style={styles.linkIcon}>📚</Text>
-                <Text style={styles.linkText}>Course Catalog</Text>
+                <Text style={styles.linkText} onPress={()=>navigation.navigate("StudentAttendanceComponent")}>Mark Attendance</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('AssignmentsPage')}>
                 <Text style={styles.linkIcon}>📝</Text>
@@ -743,7 +743,7 @@ const HomePage = ({navigation}) => {
               )}
               <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('SchedulePage')}>
                 <Text style={styles.linkIcon}>📅</Text>
-                <Text style={styles.linkText}>Schedule</Text>
+                <Text style={styles.linkText} onPress={() => navigation.navigate('StudentScreen')}>Schedule</Text>
               </TouchableOpacity>
             </View>
           </View>

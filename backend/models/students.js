@@ -27,6 +27,7 @@ function studentCoursesData(ID) {
 		`
 
 		const params = [ID]
+		//  console.log("i m in this function");
 
 		db.all(sql, params, (err, rows) => {
 			if (err) return reject(err);

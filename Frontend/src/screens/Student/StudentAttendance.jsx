@@ -6,6 +6,8 @@ const StudentAttendanceComponent = ({ studentName, courses = [] }) => {
   const [attendanceRequests, setAttendanceRequests] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  
+
   // This would be replaced with actual API calls to fetch attendance requests
   useEffect(() => {
     // Simulate fetching data

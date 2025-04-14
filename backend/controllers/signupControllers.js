@@ -14,7 +14,7 @@ function signupGetController(req, res) {
 
 async function signupPostController(req, res) {
 	// Form data is embedded in the request body, not the url queries.
-	const { username, ID, password, role,isAdmin } = req.body;
+	const { username, ID, password,phone, role,isAdmin } = req.body;
 	
 	if (!username || !ID || !password || !role) {
 		return res.status(400).json({ success: false, message: 'Username, ID, password and role required!' });

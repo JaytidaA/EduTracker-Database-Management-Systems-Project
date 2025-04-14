@@ -334,6 +334,10 @@ import { useState } from 'react';
 // import {AuthProvider, useAuth  }  from './src/AuthContext'
 import AdminScreen from './src/screens/AdminScreen';
 import AddStudentScreen from './src/screens/Student/StudentScreen';
+// import CourseDetailPage from './src/screens/CourseDetailPage';
+// import StudentAttendanceComponent from './src/screens/Student/StudentAttendance';
+
+
 const Stack = createNativeStackNavigator();
 
 const AppStack = () => {
@@ -344,7 +348,11 @@ const AppStack = () => {
       <Stack.Screen name="AttendanceScreen" component={AttendanceScreen} />
       <Stack.Screen name="TeacherGenerateQr" component={TeacherGenerateQr} />
       <Stack.Screen name="CourseDetailPage" component={CourseDetailPage} />
-      {/* <Stack.Screen name="LogIn" component={LogIn} /> */}
+      <Stack.Screen name="StudentAttendanceComponent" component={StudentAttendanceComponent} />
+      <Stack.Screen name="StudentScreen" component={AddStudentScreen} />
+      <Stack.Screen name="StudentSignUp" component={StudentSignUp} />
+      <Stack.Screen name="AdminScreen" component={AdminScreen} />
+      <Stack.Screen name="LogIn" component={LogIn} />
     </Stack.Navigator>
   );
 };

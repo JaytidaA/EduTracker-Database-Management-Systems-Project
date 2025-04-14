@@ -310,6 +310,7 @@ import {
   Image,
   FlatList,
   SafeAreaView,
+  ActivityIndicator
 } from 'react-native';
 
 import AttendanceScreen from './src/screens/Teacher/AttendanceScreen';
@@ -353,12 +354,12 @@ const AuthStack = () => {
     <Stack.Navigator>
       {/* <Stack.Screen name="AdminScreen" component={AdminScreen} />  */}
       {/* <Stack.Screen name="AddStudent" component={AddStudentScreen} /> */}
+      <Stack.Screen name="LogIn" component={LogIn} />
       <Stack.Screen name="HomePage" component={HomePage} />
       <Stack.Screen name="TeacherSignUp" component={TeacherSignUp} />
       {/* <Stack.Screen name="StudentSignUp" component={StudentSignUp} /> */}
       <Stack.Screen name="TeacherAttendanceCompnent" component={TeacherAttendanceComponent}/>
       <Stack.Screen name="StudentAttendanceComponent" component={StudentAttendanceComponent} />
-      <Stack.Screen name="LogIn" component={LogIn} />
     </Stack.Navigator>
   );
 };
@@ -373,12 +374,32 @@ const AuthStack = () => {
 //   );
 // };
 
-const RootNavigator = () => {
-  const { isAuthenticated } = useAuth();
+// const RootNavigator = () => {
+//   const { isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    console.log("RootNavigator - Auth state changed:", isAuthenticated);
-  }, [isAuthenticated]);
+//   useEffect(() => {
+//     console.log("RootNavigator - Auth state changed:", isAuthenticated);
+//   }, [isAuthenticated]);
+
+//   return (
+//     <NavigationContainer>
+//       {isAuthenticated ? <AppStack /> : <AuthStack />}
+//     </NavigationContainer>
+//   );
+// };
+
+const RootNavigator = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Show a loading screen while checking authentication
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#3b5998' }}>
+        <ActivityIndicator size="large" color="white" />
+        <Text style={{ color: 'white', marginTop: 10 }}>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer>

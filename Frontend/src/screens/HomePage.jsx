@@ -486,15 +486,15 @@ import {
   Image,
   Button,
   ActivityIndicator,
-  Alert
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuth} from "../AuthContext";
 
 const HomePage = ({navigation}) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState(null);
-  const {isAuthenticated, setIsAuthenticated} = useAuth();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
   const [userId, setUserId] = useState(null);
   const [userRole, setUserRole] = useState(null);
 
@@ -504,26 +504,24 @@ const HomePage = ({navigation}) => {
         const value = await AsyncStorage.getItem("isAuthenticated");
         const storedUserId = await AsyncStorage.getItem("userId");
         const storedUserRole = await AsyncStorage.getItem("userRole");
-        
-        if (value === "true") {
+
+        if (value === "true" && storedUserId && storedUserRole) {
           setIsAuthenticated(true);
           setUserId(storedUserId);
           setUserRole(storedUserRole);
         } else {
           setIsAuthenticated(false);
-          navigation.replace('LogIn'); // Redirect to login if not authenticated
+          navigation.replace('LogIn');
         }
-        console.log("Auth state on load:", value);
       } catch (error) {
         console.error("Error reading auth state:", error);
       }
     };
-    
+
     getAuthState();
-  }, [setIsAuthenticated, navigation]);
+  }, []);
 
   useEffect(() => {
-    // Only fetch data if we have the user ID and role
     if (userId && userRole) {
       fetchUserData();
     }
@@ -532,12 +530,29 @@ const HomePage = ({navigation}) => {
   const fetchUserData = async () => {
     try {
       setIsLoading(true);
+      
+      // Get the token from AsyncStorage
+      const token = await AsyncStorage.getItem('token');
+      
+      if (!token) {
+        Alert.alert('Error', 'Authentication token not found. Please login again.');
+        handleLogout();
+        return;
+      }
+      
       const response = await fetch(
-        `http://192.168.0.69:3000/home?ID=${userId}&role=${userRole}`
+        `http://192.168.123.125:3000/home?ID=${userId}&role=${userRole}`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
       );
       
       const result = await response.json();
-      
+  
       if (result.success) {
         setUserData(result.data);
       } else {
@@ -550,48 +565,46 @@ const HomePage = ({navigation}) => {
       setIsLoading(false);
     }
   };
-  
+
   const handleLogout = async () => {
     try {
       await AsyncStorage.setItem("isAuthenticated", "false");
       await AsyncStorage.removeItem("userId");
       await AsyncStorage.removeItem("userRole");
+      await AsyncStorage.removeItem("token");
       setIsAuthenticated(false);
-      console.log("Logged out successfully");
       navigation.replace('LogIn');
     } catch (error) {
       console.error("Error during logout:", error);
     }
   };
 
-  // If still loading data, show a spinner
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={[styles.background, {justifyContent: 'center', alignItems: 'center'}]}>
+        <View style={[styles.background, { justifyContent: 'center', alignItems: 'center' }]}>
           <ActivityIndicator size="large" color="white" />
-          <Text style={{color: 'white', marginTop: 10}}>Loading your data...</Text>
+          <Text style={{ color: 'white', marginTop: 10 }}>Loading your data...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  // If no data returned, show an error
   if (!userData) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={[styles.background, {justifyContent: 'center', alignItems: 'center'}]}>
-          <Text style={{color: 'white', fontSize: 18, textAlign: 'center', marginHorizontal: 20}}>
+        <View style={[styles.background, { justifyContent: 'center', alignItems: 'center' }]}>
+          <Text style={{ color: 'white', fontSize: 18, textAlign: 'center', marginHorizontal: 20 }}>
             Could not load user data. Please try again later.
           </Text>
-          <TouchableOpacity 
-            style={[styles.courseButton, {marginTop: 20}]} 
+          <TouchableOpacity
+            style={[styles.courseButton, { marginTop: 20 }]}
             onPress={fetchUserData}
           >
             <Text style={styles.courseButtonText}>Retry</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.courseButton, {marginTop: 10, backgroundColor: '#d32f2f'}]} 
+          <TouchableOpacity
+            style={[styles.courseButton, { marginTop: 10, backgroundColor: '#d32f2f' }]}
             onPress={handleLogout}
           >
             <Text style={styles.courseButtonText}>Logout</Text>
@@ -600,7 +613,7 @@ const HomePage = ({navigation}) => {
       </SafeAreaView>
     );
   }
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#3b5998" />
@@ -612,13 +625,10 @@ const HomePage = ({navigation}) => {
             </Text>
           </View>
 
-          {/* User Profile Section */}
           <View style={styles.profileCard}>
             <View style={styles.avatarContainer}>
               <Text style={styles.avatarText}>
-                {userData.name
-                  ? userData.name.split(' ').map(name => name[0]).join('')
-                  : '?'}
+                {userData.name ? userData.name.split(' ').map(n => n[0]).join('') : '?'}
               </Text>
             </View>
             <View style={styles.profileInfo}>
@@ -627,13 +637,12 @@ const HomePage = ({navigation}) => {
             </View>
           </View>
 
-          {/* Personal Information Card */}
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Personal Information</Text>
             <View style={styles.infoContainer}>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Username:</Text>
-                <Text style={styles.infoValue}>{userData.username}</Text>
+                <Text style={styles.infoLabel}>Email:</Text>
+                <Text style={styles.infoValue}>{userData.email}</Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{userRole === 'student' ? 'Student Name:' : 'Faculty Name:'}</Text>
@@ -642,17 +651,22 @@ const HomePage = ({navigation}) => {
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{userRole === 'student' ? 'Registration No:' : 'Employee ID:'}</Text>
                 <Text style={styles.infoValue}>
-                  {userRole === 'student' ? userData.registrationNumber : userData.employeeId}
+                  {userData.ID}
                 </Text>
               </View>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Email:</Text>
-                <Text style={styles.infoValue}>{userData.email}</Text>
+                <Text style={styles.infoLabel}>Phone:</Text>
+                <Text style={styles.infoValue}>{userData.phone || 'Not provided'}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Department:</Text>
+                <Text style={styles.infoValue}>
+                  {userData.dep_ID ? `Department ${userData.dep_ID}` : 'Not assigned'}
+                </Text>
               </View>
             </View>
           </View>
 
-          {/* Enrolled or Assigned Courses */}
           <Text style={styles.sectionTitle}>
             {userRole === 'student' ? 'Enrolled Courses' : 'Assigned Courses'}
           </Text>
@@ -669,16 +683,20 @@ const HomePage = ({navigation}) => {
                 <View style={styles.infoContainer}>
                   <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Course Name:</Text>
-                    <Text style={styles.courseValue}>{course.name}</Text>
+                    <Text style={styles.courseValue}>{course.courseName}</Text>
                   </View>
                   <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Faculty:</Text>
-                    <Text style={styles.courseValue}>{course.faculty}</Text>
+                    <Text style={styles.courseValue}>{course.facName}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Department:</Text>
+                    <Text style={styles.courseValue}>{course.depName || 'N/A'}</Text>
                   </View>
                 </View>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.courseButton}
-                  onPress={() => navigation.navigate('CourseDetailPage', { courseId: course.id })}
+                  onPress={() => navigation.navigate('CourseDetailPage', { courseId: course.ID })}
                 >
                   <Text style={styles.courseButtonText}>View Details</Text>
                 </TouchableOpacity>
@@ -687,79 +705,55 @@ const HomePage = ({navigation}) => {
           ) : (
             <View style={styles.noCourseCard}>
               <Text style={styles.noCourseText}>
-                {userData.message || `No ${userRole === 'student' ? 'enrolled' : 'assigned'} courses found.`}
+                {`No ${userRole === 'student' ? 'enrolled' : 'assigned'} courses found.`}
               </Text>
             </View>
           )}
 
-          {/* Add New Course Button (for students only) */}
           {userRole === 'student' && (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.addCourseButton}
               onPress={() => navigation.navigate('CourseCatalogPage')}
             >
-              <Text style={styles.addCourseButtonText}>
-                + Add New Course
-              </Text>
+              <Text style={styles.addCourseButtonText}>+ Add New Course</Text>
             </TouchableOpacity>
           )}
 
-          {/* Quick Links */}
           <View style={styles.quickLinksContainer}>
             <Text style={styles.sectionTitle}>Quick Links</Text>
             <View style={styles.linksGrid}>
-              <TouchableOpacity 
-                style={styles.linkCard}
-                onPress={() => navigation.navigate('CourseCatalogPage')}
-              >
+              <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('CourseCatalogPage')}>
                 <Text style={styles.linkIcon}>📚</Text>
                 <Text style={styles.linkText}>Course Catalog</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={styles.linkCard}
-                onPress={() => navigation.navigate('AssignmentsPage')}
-              >
+              <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('AssignmentsPage')}>
                 <Text style={styles.linkIcon}>📝</Text>
                 <Text style={styles.linkText}>Assignments</Text>
               </TouchableOpacity>
-              
               {userRole === 'student' ? (
-                <TouchableOpacity 
-                  style={styles.linkCard}
-                  onPress={() => navigation.navigate('GradesPage')}
-                >
+                <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('GradesPage')}>
                   <Text style={styles.linkIcon}>📊</Text>
                   <Text style={styles.linkText}>Grades</Text>
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity 
-                  style={styles.linkCard}
-                  onPress={() => navigation.navigate('GradingPage')}
-                >
+                <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('GradingPage')}>
                   <Text style={styles.linkIcon}>📊</Text>
                   <Text style={styles.linkText}>Grading</Text>
                 </TouchableOpacity>
               )}
-              
-              <TouchableOpacity 
-                style={styles.linkCard}
-                onPress={() => navigation.navigate('SchedulePage')}
-              >
+              <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('SchedulePage')}>
                 <Text style={styles.linkIcon}>📅</Text>
                 <Text style={styles.linkText}>Schedule</Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          <View style={{justifyContent:'center', alignItems:'center', width:'100%', padding: 20}}>
+          <View style={{ justifyContent: 'center', alignItems: 'center', padding: 20 }}>
             <Button title="Logout" onPress={handleLogout} color="#d32f2f" />
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              © 2025 University Student Portal
-            </Text>
+            <Text style={styles.footerText}>© 2025 University Student Portal</Text>
             <Text style={styles.footerText}>Version 2.5.0</Text>
           </View>
         </ScrollView>

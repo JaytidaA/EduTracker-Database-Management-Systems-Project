@@ -32,7 +32,26 @@ function facultyCoursesData(ID) {
 	});
 }
 
+function addFaculty (ID, name, email, isAdmin, phone, dep_ID) {
+	return new Promise ((resolve, reject) => {
+		const sql = `
+			INSERT OR IGNORE INTO Faculty (ID, facName, facEmail, facIsAdmin, facPhone, dep_ID)
+			VALUES (?, ?, ?, ?, ?, ?);
+		`
+		const params = [ID, name, email, isAdmin, phone, dep_ID];
+
+		db.run(sql, params, (err) => {
+			if (err) reject (err);
+			else {
+				console.log(`Successfully added Faculty (${ID}: ${name}).`);
+				resolve();
+			}
+		});
+	});
+}
+
 module.exports = {
 	facultyData,
-	facultyCoursesData
+	facultyCoursesData,
+	addFaculty
 };

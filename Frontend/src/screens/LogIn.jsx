@@ -480,7 +480,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../AuthContext';
@@ -488,39 +488,52 @@ import { useAuth } from '../AuthContext';
 const LogIn = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const { setIsAuthenticated } = useAuth();
-  const [userRole, setUserRole] = useState('student'); // Default to student
-  const [userID, setUserID] = useState(''); // Added for ID field
+  const [userRole, setUserRole] = useState('student');
+  const [userID, setUserID] = useState('');
 
   const handleLogin = async () => {
     if (!username || !password || !userID) {
       Alert.alert('Error', 'Please enter ID, username and password');
       return;
     }
-    
+
     try {
       setIsLoading(true);
-      
-      // Updated to match backend expectation of query parameters
-      const response = await fetch(`http://192.168.0.69:3000/login?ID=${userID}&username=${username}&password=${password}&role=${userRole}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // No body needed since we're using query parameters
-      });
-      
+
+      const response = await fetch(
+        'http://192.168.123.125:3000/login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ID: userID,
+            username: username,
+            password: password,
+            role: userRole,
+          }),
+        }
+      );
+
       const data = await response.json();
-      
+
       if (response.ok) {
-        // Store authentication state
+        // Save token and other data to AsyncStorage
+        if (data.jwt) {
+          await AsyncStorage.setItem('token', data.jwt);
+        }
+    
         await AsyncStorage.setItem('isAuthenticated', 'true');
-        // Store user ID and role
         await AsyncStorage.setItem('userId', userID);
         await AsyncStorage.setItem('userRole', userRole);
-        
+    
+        // Set authenticated state
         setIsAuthenticated(true);
+        
+        // Navigate
         navigation.replace('HomePage');
       } else {
         Alert.alert('Login Failed', data.message || 'Invalid credentials');
@@ -535,14 +548,14 @@ const LogIn = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidView}
       >
         <View style={styles.loginContainer}>
           <Text style={styles.title}>University Portal</Text>
           <Text style={styles.subtitle}>Sign in to continue</Text>
-          
+
           <View style={styles.form}>
             <View style={styles.inputContainer}>
               <Text style={styles.label}>ID</Text>
@@ -554,7 +567,7 @@ const LogIn = ({ navigation }) => {
                 keyboardType="numeric"
               />
             </View>
-            
+
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Username</Text>
               <TextInput
@@ -565,7 +578,7 @@ const LogIn = ({ navigation }) => {
                 autoCapitalize="none"
               />
             </View>
-            
+
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Password</Text>
               <TextInput
@@ -576,47 +589,35 @@ const LogIn = ({ navigation }) => {
                 secureTextEntry
               />
             </View>
-            
+
             <View style={styles.roleToggleContainer}>
               <Text style={styles.label}>Login as:</Text>
               <View style={styles.roleButtonsContainer}>
                 <TouchableOpacity
-                  style={[
-                    styles.roleButton,
-                    userRole === 'student' && styles.roleButtonActive,
-                  ]}
+                  style={[styles.roleButton, userRole === 'student' && styles.roleButtonActive]}
                   onPress={() => setUserRole('student')}
                 >
                   <Text
-                    style={[
-                      styles.roleButtonText,
-                      userRole === 'student' && styles.roleButtonTextActive,
-                    ]}
+                    style={[styles.roleButtonText, userRole === 'student' && styles.roleButtonTextActive]}
                   >
                     Student
                   </Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
-                  style={[
-                    styles.roleButton,
-                    userRole === 'faculty' && styles.roleButtonActive,
-                  ]}
+                  style={[styles.roleButton, userRole === 'faculty' && styles.roleButtonActive]}
                   onPress={() => setUserRole('faculty')}
                 >
                   <Text
-                    style={[
-                      styles.roleButtonText,
-                      userRole === 'faculty' && styles.roleButtonTextActive,
-                    ]}
+                    style={[styles.roleButtonText, userRole === 'faculty' && styles.roleButtonTextActive]}
                   >
                     Faculty
                   </Text>
                 </TouchableOpacity>
               </View>
             </View>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={styles.loginButton}
               onPress={handleLogin}
               disabled={isLoading}
@@ -627,35 +628,30 @@ const LogIn = ({ navigation }) => {
                 <Text style={styles.loginButtonText}>Login</Text>
               )}
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={styles.forgotPasswordLink}
               onPress={() => navigation.navigate('ForgotPasswordPage')}
             >
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
           </View>
-          
+
           <View style={styles.registerContainer}>
             <Text style={styles.registerText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => {
-              // if(userRole === 'student'){
-              //   navigation.navigate('StudentSignUp');
-              // } else {
-              //   navigation.navigate('TeacherSignUp');
-              // }
-
-              if(userRole==='faculty'){
-                navigation.navigate('TeacherSignUp');
-              }
-              else{
-                Alert.alert(
-                  "Access Restricted",
-                  "You don’t have an account. The admin will create your account.",
-                  [{ text: "OK" }]
-                );
-              }
-            }}>
+            <TouchableOpacity
+              onPress={() => {
+                if (userRole === 'faculty') {
+                  navigation.navigate('TeacherSignUp');
+                } else {
+                  Alert.alert(
+                    'Access Restricted',
+                    'You don’t have an account. The admin will create your account.',
+                    [{ text: 'OK' }]
+                  );
+                }
+              }}
+            >
               <Text style={styles.registerLink}>Register</Text>
             </TouchableOpacity>
           </View>

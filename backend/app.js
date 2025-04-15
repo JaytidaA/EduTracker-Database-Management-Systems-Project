@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
 	res.send("<h1>EduTracker: Tracking your Attendance</h1>");
 })
 
-app.use('/signup', routes.routeSignup)
+app.use('/signup', auth.jwt, routes.routeSignup)
 app.use('/login', routes.routeLogin)
 app.use('/home', auth.jwt, routes.routeHome)
 app.use('/attendance', auth.jwt, routes.routeAttendance)

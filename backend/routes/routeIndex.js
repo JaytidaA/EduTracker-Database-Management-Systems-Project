@@ -22,8 +22,9 @@ routeHome.get('/', homeControllers.get);
 
 routeAttendance.get('/:cID', attendanceControllers.get);
 
-routeMark.use('/', markControllers.log);
+routeMark.use('/', markControllers.filter);
 routeMark.get('/', markControllers.get);
+routeMark.post('/', markControllers.post);
 
 module.exports = {
 	routeSignup,

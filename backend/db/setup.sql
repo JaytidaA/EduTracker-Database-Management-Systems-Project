@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS Faculty (
 );
 
 CREATE TABLE IF NOT EXISTS Attendance (
-	attendDate DATE,
+	attendDate DATETIME,
 	attendStatus CHAR (1),
 	course_ID INTEGER REFERENCES Course(ID),
 	student_ID INTEGER REFERENCES Student(ID),
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS Account (
 
 CREATE TABLE IF NOT EXISTS Lectures (
 	course_ID INTEGER REFERENCES Course(ID),
-	lectureDate DATE,
+	lectureDate DATETIME,
 	lectureNumber INTEGER DEFAULT 1,
 
 	PRIMARY KEY (course_ID, lectureDate, lectureNumber)

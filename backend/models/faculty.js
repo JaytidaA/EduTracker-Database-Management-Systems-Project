@@ -30,10 +30,20 @@ function facultyCoursesData(ID) {
 	});
 }
 
+<<<<<<< HEAD
 function addFaculty(ID, name, email, isAdmin, phone, dep_ID) {
 	return new Promise((resolve, reject) => {
 		// Make sure isAdmin is a number
 		const isAdminInt = parseInt(isAdmin);
+=======
+function addFaculty (ID, name, email, isAdmin, phone, dep_ID) {
+	return new Promise ((resolve, reject) => {
+		const sql = `
+			INSERT OR IGNORE INTO Faculty (ID, facName, facEmail, facIsAdmin, facPhone, dep_ID)
+			VALUES (?, ?, ?, ?, ?, ?);
+		`
+		const params = [ID, name, email, isAdmin, phone, dep_ID];
+>>>>>>> 3ecd856325e0ebc1dbf7fe2276ab497598ac4a23
 
 		const sql = `
 			INSERT INTO Faculty (ID, facName, facEmail, facIsAdmin, facPhone, dep_ID)

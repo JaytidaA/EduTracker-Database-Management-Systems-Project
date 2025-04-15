@@ -8,11 +8,35 @@ const { accountRetrievalUsername, accountSignup } = require('../models/accounts.
 
 const { SALT_ROUNDS } = require('../config/config.js')
 
+function isUnauthorised(jwtUser) {
+	// 0: Authorised, no error
+	// 1: Unauthorised
+
+	const { ID, role } = jwtUser;
+	if (role != 'faculty') {
+		console.log('Not faculty')
+		return 1;
+	}
+
+	const { isAdmin } = jwtUser;
+	if (!isAdmin) {
+		return 1;
+	}
+}
+
 function signupGetController(req, res) {
+	if (isUnauthorised(req.jwtUser)) {
+		return res.status(403).json({ success: false, message: 'Unauthorised to view this page.' })
+	}
+
 	res.json({ success: true, message: 'Signup page reached' })
 }
 
 async function signupPostController(req, res) {
+	if (isUnauthorised(req.jwtUser)) {
+		return res.status(403).json({ success: false, message: 'Unauthorised to view this page.' })
+	}
+
 	// Form data is embedded in the request body, not the url queries.
 	const { username, ID, password,phone, role,isAdmin } = req.body;
 	
@@ -55,7 +79,7 @@ async function signupPostController(req, res) {
 			// Later write a custom function to check if email is verified or not.
 			emailIsVerified = true;
 			if (!emailIsVerified) {
-				console.log(`Signing in with an unverified email: ${email}`);
+				console.log(`Signing up with an unverified email: ${email}`);
 				return res.status(403).json({ success: false, message: 'Unverified email. Please use a different email' });
 			}
 

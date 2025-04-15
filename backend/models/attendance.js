@@ -84,7 +84,7 @@ function markAttendance(attendDate, attendStatus, course_ID, student_ID, lecture
 
 		const params = [attendDate, attendStatus, course_ID, student_ID, lecture_Number];
 
-		db.exec(sql, params, (err) => {
+		db.run(sql, params, (err) => {
 			if (err) return reject(err);
 			else resolve();
 		});
@@ -100,7 +100,7 @@ function createLecture(course_ID, lectureDate, lectureNumber) {
 
 		const params = [course_ID, lectureDate, lectureNumber];
 
-		db.exec(sql, params, (err) => {
+		db.run(sql, params, (err) => {
 			if (err) return reject(err);
 			else resolve();
 		});

@@ -4,7 +4,7 @@ module.exports = {
 	SALT_ROUNDS: 10,
 
 	// This is very unsafe, move it elsewhere
-	JWT_SECRET: 'lachure'
+	JWT_SECRET: 'lachure',
 
 	utility: {
 		getDateTime

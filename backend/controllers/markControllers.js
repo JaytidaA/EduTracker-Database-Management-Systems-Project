@@ -1,4 +1,4 @@
-const { activeLectureData, markAttendance } = require('../models/attendance.js');
+const { activeLectureData, markAttendance, createLecture } = require('../models/attendance.js');
 const { utility } = require('../config/config.js')
 
 function isPrivate(ip) {

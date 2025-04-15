@@ -14,6 +14,7 @@ function isUnauthorised(jwtUser) {
 
 	const { ID, role } = jwtUser;
 	if (role != 'faculty') {
+		console.log('Not faculty')
 		return 1;
 	}
 

@@ -491,13 +491,46 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuth} from "../AuthContext";
 
+// const axios = require('axios');
+
 const HomePage = ({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [processedData, setProcessedData] = useState(null);
   const { isAuthenticated, setIsAuthenticated } = useAuth();
   const [userId, setUserId] = useState(null);
   const [userRole, setUserRole] = useState(null);
 
+
+
+async function sendAttendanceMarkRequest() {
+  try {
+    console.log("I m triggered!");
+    const params = new URLSearchParams();
+    params.append('course_ID', '1');
+    params.append('lectureDate', '15-04-25');
+    params.append('lectureNumber', '1');
+
+    const response = await axios.get('http://192.168.123.125:3000/mark', {
+      params: {
+        course_ID: 1,
+        lectureDate: '15-04-25',
+        lectureNumber: 1
+      },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+
+    console.log(response.data);
+  } catch (error) {
+    console.error('Error sending request:', error);
+  }
+}
+
+sendAttendanceMarkRequest();
+
+  
   useEffect(() => {
     const getAuthState = async () => {
       try {
@@ -526,6 +559,39 @@ const HomePage = ({navigation}) => {
       fetchUserData();
     }
   }, [userId, userRole]);
+
+  // Process faculty or student data to a consistent format
+  useEffect(() => {
+    if (userData) {
+      const processed = processUserData(userData, userRole);
+      setProcessedData(processed);
+    }
+  }, [userData, userRole]);
+
+  // Function to process user data based on role
+  const processUserData = (data, role) => {
+    if (role === 'faculty') {
+      return {
+        name: data.facName || 'Unknown Faculty',
+        email: data.facEmail || 'No Email',
+        ID: data.ID || 'Unknown ID',
+        phone: data.facPhone || 'Not provided',
+        dep_ID: data.dep_ID || 'Not assigned',
+        courses: data.courses || [],
+        isAdmin: data.facIsAdmin === 1
+      };
+    } else {
+      // Student data format - assuming original structure
+      return {
+        name: data.name || 'Unknown Student',
+        email: data.email || 'No Email',
+        ID: data.ID || 'Unknown ID',
+        phone: data.phone || 'Not provided',
+        dep_ID: data.dep_ID || 'Not assigned',
+        courses: data.courses || []
+      };
+    }
+  };
 
   const fetchUserData = async () => {
     try {
@@ -590,7 +656,7 @@ const HomePage = ({navigation}) => {
     );
   }
 
-  if (!userData) {
+  if (!processedData) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={[styles.background, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -628,12 +694,17 @@ const HomePage = ({navigation}) => {
           <View style={styles.profileCard}>
             <View style={styles.avatarContainer}>
               <Text style={styles.avatarText}>
-                {userData.name ? userData.name.split(' ').map(n => n[0]).join('') : '?'}
+                {processedData.name ? processedData.name.split(' ').map(n => n[0]).join('') : '?'}
               </Text>
             </View>
             <View style={styles.profileInfo}>
               <Text style={styles.welcomeText}>Welcome back,</Text>
-              <Text style={styles.nameText}>{userData.name}</Text>
+              <Text style={styles.nameText}>{processedData.name}</Text>
+              {userRole === 'faculty' && processedData.isAdmin && (
+                <View style={styles.adminBadge}>
+                  <Text style={styles.adminText}>Admin</Text>
+                </View>
+              )}
             </View>
           </View>
 
@@ -642,26 +713,26 @@ const HomePage = ({navigation}) => {
             <View style={styles.infoContainer}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Email:</Text>
-                <Text style={styles.infoValue}>{userData.email}</Text>
+                <Text style={styles.infoValue}>{processedData.email}</Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{userRole === 'student' ? 'Student Name:' : 'Faculty Name:'}</Text>
-                <Text style={styles.infoValue}>{userData.name}</Text>
+                <Text style={styles.infoValue}>{processedData.name}</Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{userRole === 'student' ? 'Registration No:' : 'Employee ID:'}</Text>
                 <Text style={styles.infoValue}>
-                  {userData.ID}
+                  {processedData.ID}
                 </Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Phone:</Text>
-                <Text style={styles.infoValue}>{userData.phone || 'Not provided'}</Text>
+                <Text style={styles.infoValue}>{processedData.phone}</Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Department:</Text>
                 <Text style={styles.infoValue}>
-                  {userData.dep_ID ? `Department ${userData.dep_ID}` : 'Not assigned'}
+                  {processedData.dep_ID ? `Department ${processedData.dep_ID}` : 'Not assigned'}
                 </Text>
               </View>
             </View>
@@ -671,8 +742,8 @@ const HomePage = ({navigation}) => {
             {userRole === 'student' ? 'Enrolled Courses' : 'Assigned Courses'}
           </Text>
 
-          {userData.courses && userData.courses.length > 0 ? (
-            userData.courses.map((course, index) => (
+          {processedData.courses && processedData.courses.length > 0 ? (
+            processedData.courses.map((course, index) => (
               <View key={index} style={styles.courseCard}>
                 <View style={styles.courseHeader}>
                   <Text style={styles.courseNumber}>Course {index + 1}</Text>
@@ -685,10 +756,12 @@ const HomePage = ({navigation}) => {
                     <Text style={styles.infoLabel}>Course Name:</Text>
                     <Text style={styles.courseValue}>{course.courseName}</Text>
                   </View>
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Faculty:</Text>
-                    <Text style={styles.courseValue}>{course.facName}</Text>
-                  </View>
+                  {userRole === 'student' && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Faculty:</Text>
+                      <Text style={styles.courseValue}>{course.facName || 'N/A'}</Text>
+                    </View>
+                  )}
                   <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Department:</Text>
                     <Text style={styles.courseValue}>{course.depName || 'N/A'}</Text>
@@ -722,29 +795,51 @@ const HomePage = ({navigation}) => {
           <View style={styles.quickLinksContainer}>
             <Text style={styles.sectionTitle}>Quick Links</Text>
             <View style={styles.linksGrid}>
-              <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('CourseCatalogPage')}>
-                <Text style={styles.linkIcon}>📚</Text>
-                <Text style={styles.linkText} onPress={()=>navigation.navigate("StudentAttendanceComponent")}>Mark Attendance</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('AssignmentsPage')}>
-                <Text style={styles.linkIcon}>📝</Text>
-                <Text style={styles.linkText}>Assignments</Text>
-              </TouchableOpacity>
               {userRole === 'student' ? (
-                <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('GradesPage')}>
-                  <Text style={styles.linkIcon}>📊</Text>
-                  <Text style={styles.linkText}>Grades</Text>
-                </TouchableOpacity>
+                <>
+                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('StudentAttendanceComponent')}>
+                    <Text style={styles.linkIcon}>✓</Text>
+                    <Text style={styles.linkText}>Mark Attendance</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('AssignmentsPage')}>
+                    <Text style={styles.linkIcon}>📝</Text>
+                    <Text style={styles.linkText}>Assignments</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('GradesPage')}>
+                    <Text style={styles.linkIcon}>📊</Text>
+                    <Text style={styles.linkText}>Grades</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('TeacherAttendanceComponent')}>
+                    <Text style={styles.linkIcon}>📅</Text>
+                    <Text style={styles.linkText}>Schedule</Text>
+                  </TouchableOpacity>
+                </>
               ) : (
-                <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('GradingPage')}>
-                  <Text style={styles.linkIcon}>📊</Text>
-                  <Text style={styles.linkText}>Grading</Text>
-                </TouchableOpacity>
+                <>
+                  <TouchableOpacity style={styles.linkCard} onPress={() => {sendAttendanceMarkRequest();navigation.navigate('TeacherAttendanceComponent')}} >
+                    <Text style={styles.linkIcon}>📋</Text>
+                    <Text style={styles.linkText} >Take Attendance</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('AssignmentsPage')}>
+                    <Text style={styles.linkIcon}>📝</Text>
+                    <Text style={styles.linkText}>Manage Assignments</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('GradingPage')}>
+                    <Text style={styles.linkIcon}>📊</Text>
+                    <Text style={styles.linkText}>Grading</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('SchedulePage')}>
+                    <Text style={styles.linkIcon}>📅</Text>
+                    <Text style={styles.linkText}>My Schedule</Text>
+                  </TouchableOpacity>
+                  {processedData.isAdmin && (
+                    <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('AdminPanel')}>
+                      <Text style={styles.linkIcon}>⚙️</Text>
+                      <Text style={styles.linkText}>Admin Panel</Text>
+                    </TouchableOpacity>
+                  )}
+                </>
               )}
-              <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('SchedulePage')}>
-                <Text style={styles.linkIcon}>📅</Text>
-                <Text style={styles.linkText} onPress={() => navigation.navigate('StudentScreen')}>Schedule</Text>
-              </TouchableOpacity>
             </View>
           </View>
 
@@ -822,6 +917,19 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
+  },
+  adminBadge: {
+    backgroundColor: '#ff9800',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  adminText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   card: {
     backgroundColor: 'white',

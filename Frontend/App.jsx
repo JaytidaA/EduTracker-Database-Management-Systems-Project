@@ -323,7 +323,7 @@ import StudentSignUp from './src/screens/Student/StudentSignUP';
 
 //yadnyesh
 import StudentAttendanceComponent from './src/screens/Student/StudentAttendance';
-import TeacherAttendanceComponent from './src/screens/Teacher/TeacherAttendanceCoomponent';
+// import TeacherAttendanceComponent from './src/screens/Teacher/TeacherAttendanceCoomponent';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -336,8 +336,8 @@ import AdminScreen from './src/screens/AdminScreen';
 import AddStudentScreen from './src/screens/Student/StudentScreen';
 // import CourseDetailPage from './src/screens/CourseDetailPage';
 // import StudentAttendanceComponent from './src/screens/Student/StudentAttendance';
-
-
+import TeacherAttendanceComponent from './src/screens/Teacher/TeacherAttendanceCoomponent';
+import AttendanceRequest from './src/screens/AttendanceRequest';
 const Stack = createNativeStackNavigator();
 
 const AppStack = () => {
@@ -353,6 +353,8 @@ const AppStack = () => {
       <Stack.Screen name="StudentSignUp" component={StudentSignUp} />
       <Stack.Screen name="AdminScreen" component={AdminScreen} />
       <Stack.Screen name="LogIn" component={LogIn} />
+      <Stack.Screen name="TeacherAttendanceComponent" component={TeacherAttendanceComponent}/>
+      <Stack.Screen name="AttendanceRequest" component={AttendanceRequest} />
     </Stack.Navigator>
   );
 };

@@ -492,6 +492,8 @@ const LogIn = ({ navigation }) => {
   const { setIsAuthenticated } = useAuth();
   const [userRole, setUserRole] = useState('student');
   const [userID, setUserID] = useState('');
+  const IP_ADDRESS="192.168.123.125"
+const PORT="3000"
 
   const handleLogin = async () => {
     if (!username || !password || !userID) {
@@ -503,7 +505,7 @@ const LogIn = ({ navigation }) => {
       setIsLoading(true);
 
       const response = await fetch(
-        'http://192.168.123.125:3000/login',
+        `http://${IP_ADDRESS}:${PORT}/login`,
         {
           method: 'POST',
           headers: {

@@ -338,6 +338,7 @@ import AddStudentScreen from './src/screens/Student/StudentScreen';
 // import StudentAttendanceComponent from './src/screens/Student/StudentAttendance';
 import TeacherAttendanceComponent from './src/screens/Teacher/TeacherAttendanceCoomponent';
 import AttendanceRequest from './src/screens/AttendanceRequest';
+import AttendanceGraph from './src/screens/AttendanceGraph';
 const Stack = createNativeStackNavigator();
 
 const AppStack = () => {
@@ -355,6 +356,7 @@ const AppStack = () => {
       <Stack.Screen name="LogIn" component={LogIn} />
       <Stack.Screen name="TeacherAttendanceComponent" component={TeacherAttendanceComponent}/>
       <Stack.Screen name="AttendanceRequest" component={AttendanceRequest} />
+      <Stack.Screen name="AttendanceGraph" component={AttendanceGraph} />
     </Stack.Navigator>
   );
 };

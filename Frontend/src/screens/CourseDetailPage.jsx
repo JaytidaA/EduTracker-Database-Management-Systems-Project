@@ -1,85 +1,201 @@
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
-  SafeAreaView, 
+import React, { useState, useEffect } from 'react';
+import {PORT , IP_ADDRESS} from '@env';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
   StatusBar,
-  Image,
-  Dimensions
+  Alert,
+  Dimensions,
+  ActivityIndicator
 } from 'react-native';
-
-// Sample data
-const courseData = {
-  name: "Advanced Data Structures",
-  code: "CS-301",
-  credits: 4,
-  faculty: "Computer Science",
-  instructor: "Dr. Alan Turing",
-  schedule: "Mon, Wed, Fri - 10:00 AM to 11:30 AM",
-  location: "Building A, Room 204",
-  attendancePercentage: 72,
-  nextClass: "Wednesday, April 6, 2025",
-  assignments: [
-    { id: 1, title: "Binary Tree Implementation", dueDate: "Apr 10, 2025", status: "Pending" },
-    { id: 2, title: "Graph Algorithms Quiz", dueDate: "Apr 15, 2025", status: "Pending" },
-    { id: 3, title: "Hash Table Report", dueDate: "Mar 28, 2025", status: "Submitted" }
-  ],
-  attendanceData: [
-    { date: "Mar 1", status: "Present" },
-    { date: "Mar 3", status: "Present" },
-    { date: "Mar 6", status: "Absent" },
-    { date: "Mar 8", status: "Present" },
-    { date: "Mar 10", status: "Present" },
-    { date: "Mar 13", status: "Present" },
-    { date: "Mar 15", status: "Absent" },
-    { date: "Mar 17", status: "Present" },
-    { date: "Mar 20", status: "Present" },
-    { date: "Mar 22", status: "Present" },
-    { date: "Mar 24", status: "Absent" },
-    { date: "Mar 27", status: "Present" },
-    { date: "Mar 29", status: "Present" },
-    { date: "Mar 31", status: "Present" },
-    { date: "Apr 3", status: "Present" },
-  ]
-};
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const screenWidth = Dimensions.get('window').width;
 
-const CourseDetailPage = () => {
+// The component properly accepts route and navigation as props
+const CourseDetailPage = ({ route, navigation }) => {
+  // Safely extract courseId from route params with a fallback
+  const courseId = route?.params?.courseId || 'default';
   const [activeTab, setActiveTab] = useState('overview');
+  const [requestSent, setRequestSent] = useState(false);
+  const [isRequestLoading, setIsRequestLoading] = useState(false);
+  const [courseData, setCourseData] = useState(null);
+  const [lectureInfo, setLectureInfo] = useState([]);
+  const [attendanceInfo, setAttendanceInfo] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const IP_ADDRESS="192.168.123.125"
+const PORT="3000"
+  // const role=AsyncStorage.getItem(userRole);
+  
+  // Fetch course data, lecture info, and attendance data
+  useEffect(() => {
+    fetchAttendanceData(courseId);
+  }, [courseId]);
+  
+  const fetchAttendanceData = async (cID) => {
+    setLoading(true);
+    setError(null);
+  
+    try {
+      const token = await getAuthToken(); // ⬅️ Important
+  
+      const response = await fetch(`http://${IP_ADDRESS}:${PORT}/attendance/${cID}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || `Failed to fetch: ${response.status}`);
+      }
+  
+      setCourseData(data.courseInfo);
+      setLectureInfo(data.lectureInfo);
+      setAttendanceInfo(data.attendanceInfo);
+  
+    } catch (err) {
+      console.error('Error fetching attendance data:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
+  // Function to get auth token - replace with your actual implementation
+  const getAuthToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        console.warn('No authentication token found');
+        // Optional: Navigate to login screen
+        // navigation.navigate('Login');
+      }
+      return token;
+    } catch (err) {
+      console.error('Error getting token from storage', err);
+      return null;
+    }
+  };
+  
+  
+  // Function to send attendance request to students
+  const sendAttendanceRequest = async () => {
+    setIsRequestLoading(true);
+  
+    try {
+      const token = await getAuthToken(); // ⬅️ Fetch token here
+
+      const response = await fetch(`http://${IP_ADDRESS}:${PORT}/mark`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          course_ID: courseId,
+          lecture_Number: lectureInfo.length + 1
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (data.success) {
+        setRequestSent(true);
+        Alert.alert("Attendance Request Sent", "Attendance request has been sent to all students.", [{ text: "OK" }]);
+        setTimeout(() => setRequestSent(false), 5000);
+      } else {
+        Alert.alert("Error", data.message || "Failed to send attendance request");
+      }
+    } catch (err) {
+      console.error('Error sending attendance request:', err);
+      Alert.alert("Error", "Network error while sending attendance request");
+    } finally {
+      setIsRequestLoading(false);
+    }
+  };
+  
+  // Calculate attendance percentage
+  const calculateAttendancePercentage = () => {
+    if (!attendanceInfo || attendanceInfo.length === 0 || !lectureInfo || lectureInfo.length === 0) {
+      return 0;
+    }
+    
+    const presentCount = attendanceInfo.filter(item => item.status === 'p').length;
+    return Math.round((presentCount / lectureInfo.length) * 100);
+  };
   
   const renderAttendanceGraph = () => {
+    if (!attendanceInfo || attendanceInfo.length === 0) {
+      return (
+        <View style={styles.noDataContainer}>
+          <Text style={styles.noDataText}>No attendance data available</Text>
+        </View>
+      );
+
+    }
+
+    
+    
+    // Format attendance data for graph
+    const graphData = attendanceInfo.map(item => ({
+      date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      status: item.status === 'p' ? "Present" : "Absent"
+    }));
+    
     return (
       <View style={styles.graphContainer}>
         <View style={styles.graphHeader}>
           <Text style={styles.graphTitle}>Attendance Record</Text>
         </View>
-        <View style={styles.graph}>
-          {courseData.attendanceData.map((day, index) => (
-            <View key={index} style={styles.graphDayColumn}>
-              <View 
-                style={[
-                  styles.graphBar, 
-                  {backgroundColor: day.status === "Present" ? "#4CAF50" : "#FF5252"}
-                ]}
-              />
-              <Text style={styles.graphDate}>{day.date}</Text>
-              <Text style={styles.graphStatus}>{day.status === "Present" ? "P" : "A"}</Text>
-            </View>
-          ))}
-        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={styles.graph}>
+            {graphData.map((day, index) => (
+              <View key={index} style={styles.graphDayColumn}>
+                <View 
+                  style={[
+                    styles.graphBar, 
+                    {backgroundColor: day.status === "Present" ? "#4CAF50" : "#FF5252"}
+                  ]}
+                />
+                <Text style={styles.graphDate}>{day.date}</Text>
+                <Text style={styles.graphStatus}>{day.status === "Present" ? "P" : "A"}</Text>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
       </View>
     );
   };
 
   const renderAssignments = () => {
+    // Since we don't have assignments data in the API yet, we'll use placeholder data or an empty state
+    const assignments = [
+      { id: 1, title: "Binary Tree Implementation", dueDate: "Apr 10, 2025", status: "Pending" },
+      { id: 2, title: "Graph Algorithms Quiz", dueDate: "Apr 15, 2025", status: "Pending" },
+      { id: 3, title: "Hash Table Report", dueDate: "Mar 28, 2025", status: "Submitted" }
+    ];
+    
+    if (assignments.length === 0) {
+      return (
+        <View style={styles.noDataContainer}>
+          <Text style={styles.noDataText}>No assignments available</Text>
+        </View>
+      );
+    }
+    
     return (
       <View style={styles.assignmentsContainer}>
         <Text style={styles.sectionSubtitle}>Upcoming and Recent Assignments</Text>
-        {courseData.assignments.map((assignment) => (
+        {assignments.map((assignment) => (
           <View key={assignment.id} style={styles.assignmentItem}>
             <View style={styles.assignmentHeader}>
               <Text style={styles.assignmentTitle}>{assignment.title}</Text>
@@ -97,6 +213,48 @@ const CourseDetailPage = () => {
     );
   };
   
+  // Render loading state
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#ffffff" />
+          <Text style={styles.loadingText}>Loading course data...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  
+  // Render error state
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Error: {error}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={() => fetchAttendanceData(courseId)}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  
+  // If no courseData yet, show a placeholder
+  if (!courseData) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.background}>
+          <Text style={styles.loadingText}>No course data available</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  
+  const attendancePercentage = calculateAttendancePercentage();
+  
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#3b5998" />
@@ -104,7 +262,10 @@ const CourseDetailPage = () => {
         <ScrollView>
           {/* Header with Back Button */}
           <View style={styles.header}>
-            <TouchableOpacity style={styles.backButton}>
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+            >
               <Text style={styles.backButtonText}>←</Text>
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Course Details</Text>
@@ -121,23 +282,23 @@ const CourseDetailPage = () => {
             <View style={styles.infoContainer}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Course Name:</Text>
-                <Text style={styles.infoValue}>{courseData.name}</Text>
+                <Text style={styles.infoValue}>{courseData.courseName}</Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Course Code:</Text>
-                <Text style={styles.infoValue}>{courseData.code}</Text>
+                <Text style={styles.infoValue}>{courseData.courseCode}</Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Credits:</Text>
-                <Text style={styles.infoValue}>{courseData.credits}</Text>
+                <Text style={styles.infoValue}>{courseData.courseCredits}</Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Faculty:</Text>
-                <Text style={styles.infoValue}>{courseData.faculty}</Text>
+                <Text style={styles.infoValue}>Faculty {courseData.fac_ID}</Text>
               </View>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Instructor:</Text>
-                <Text style={styles.infoValue}>{courseData.instructor}</Text>
+                <Text style={styles.infoLabel}>Department:</Text>
+                <Text style={styles.infoValue}>Department {courseData.dep_ID}</Text>
               </View>
             </View>
           </View>
@@ -145,9 +306,30 @@ const CourseDetailPage = () => {
           {/* Next Class Card */}
           <View style={styles.nextClassContainer}>
             <Text style={styles.nextClassTitle}>Next Class</Text>
-            <Text style={styles.nextClassDate}>{courseData.nextClass}</Text>
-            <Text style={styles.nextClassDetails}>{courseData.schedule}</Text>
-            <Text style={styles.nextClassDetails}>{courseData.location}</Text>
+            <Text style={styles.nextClassDate}>
+              {lectureInfo && lectureInfo.length > 0 ? 
+                new Date(lectureInfo[lectureInfo.length - 1].date).toLocaleDateString('en-US', { 
+                  weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' 
+                }) : 
+                "No upcoming classes scheduled"}
+            </Text>
+            
+            {/* Attendance Request Button - Only show for faculty */}
+            <TouchableOpacity 
+              style={[
+                styles.attendanceRequestButton, 
+                isRequestLoading && styles.attendanceRequestButtonLoading,
+                requestSent && styles.attendanceRequestButtonSent
+              ]}
+              onPress={sendAttendanceRequest}
+              disabled={isRequestLoading || requestSent}
+            >
+              <Text style={styles.attendanceRequestButtonText}>
+                {isRequestLoading ? "Sending Request..." : 
+                 requestSent ? "Request Sent ✓" : 
+                 "Request Attendance"}
+              </Text>
+            </TouchableOpacity>
           </View>
           
           {/* Tabs */}
@@ -183,13 +365,13 @@ const CourseDetailPage = () => {
                   {/* Attendance Alert */}
                   <View style={styles.attendanceAlertContainer}>
                     <Text style={styles.attendanceText}>
-                      Attendance in percentage: <Text style={styles.attendancePercentage}>{courseData.attendancePercentage}%</Text>
+                      Attendance in percentage: <Text style={styles.attendancePercentage}>{attendancePercentage}%</Text>
                     </Text>
-                    {courseData.attendancePercentage < 75 && (
+                    {attendancePercentage < 75 && (
                       <View style={styles.alertBox}>
                         <Text style={styles.alertIcon}>⚠️</Text>
                         <Text style={styles.alertText}>
-                          Alert: If attendance &lt; 75%: "Attend the lecs"
+                          Alert: Your attendance is below 75%. More absences may affect your grade.
                         </Text>
                       </View>
                     )}
@@ -202,118 +384,30 @@ const CourseDetailPage = () => {
             )}
             
             {activeTab === 'materials' && (
-              <View style={styles.materialsContainer}>
+              <View style={styles.card}>
                 <Text style={styles.sectionSubtitle}>Course Materials</Text>
-                
-                <TouchableOpacity style={styles.materialItem}>
-                  <View style={styles.materialIcon}>
-                    <Text style={styles.materialIconText}>📄</Text>
-                  </View>
-                  <View style={styles.materialInfo}>
-                    <Text style={styles.materialTitle}>Week 1: Introduction to Data Structures</Text>
-                    <Text style={styles.materialDetails}>PDF • 2.4 MB • Uploaded Mar 1</Text>
-                  </View>
-                </TouchableOpacity>
-                
-                <TouchableOpacity style={styles.materialItem}>
-                  <View style={styles.materialIcon}>
-                    <Text style={styles.materialIconText}>📄</Text>
-                  </View>
-                  <View style={styles.materialInfo}>
-                    <Text style={styles.materialTitle}>Week 2: Arrays and Linked Lists</Text>
-                    <Text style={styles.materialDetails}>PDF • 3.1 MB • Uploaded Mar 8</Text>
-                  </View>
-                </TouchableOpacity>
-                
-                <TouchableOpacity style={styles.materialItem}>
-                  <View style={styles.materialIcon}>
-                    <Text style={styles.materialIconText}>📄</Text>
-                  </View>
-                  <View style={styles.materialInfo}>
-                    <Text style={styles.materialTitle}>Week 3: Stacks and Queues</Text>
-                    <Text style={styles.materialDetails}>PDF • 2.8 MB • Uploaded Mar 15</Text>
-                  </View>
-                </TouchableOpacity>
-                
-                <TouchableOpacity style={styles.materialItem}>
-                  <View style={styles.materialIcon}>
-                    <Text style={styles.materialIconText}>📄</Text>
-                  </View>
-                  <View style={styles.materialInfo}>
-                    <Text style={styles.materialTitle}>Week 4: Trees</Text>
-                    <Text style={styles.materialDetails}>PDF • 4.2 MB • Uploaded Mar 22</Text>
-                  </View>
-                </TouchableOpacity>
-                
-                <TouchableOpacity style={styles.materialItem}>
-                  <View style={styles.materialIcon}>
-                    <Text style={styles.materialIconText}>🎥</Text>
-                  </View>
-                  <View style={styles.materialInfo}>
-                    <Text style={styles.materialTitle}>Binary Tree Implementation Demo</Text>
-                    <Text style={styles.materialDetails}>MP4 • 28.7 MB • Uploaded Mar 25</Text>
-                  </View>
-                </TouchableOpacity>
+                <View style={styles.noContentContainer}>
+                  <Text style={styles.noContentText}>No course materials available yet.</Text>
+                </View>
               </View>
             )}
             
             {activeTab === 'assignments' && (
-              <View style={styles.fullAssignmentsContainer}>
-                <Text style={styles.sectionSubtitle}>All Assignments</Text>
-                
-                {courseData.assignments.map((assignment) => (
-                  <View key={assignment.id} style={styles.assignmentItem}>
-                    <View style={styles.assignmentHeader}>
-                      <Text style={styles.assignmentTitle}>{assignment.title}</Text>
-                      <View style={[
-                        styles.statusBadge, 
-                        {backgroundColor: assignment.status === "Submitted" ? "#4CAF50" : "#FF9800"}
-                      ]}>
-                        <Text style={styles.statusText}>{assignment.status}</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.assignmentDueDate}>Due: {assignment.dueDate}</Text>
-                    <TouchableOpacity style={styles.viewAssignmentButton}>
-                      <Text style={styles.viewAssignmentText}>View Details</Text>
-                    </TouchableOpacity>
-                  </View>
-                ))}
-                
-                <View style={styles.assignmentItem}>
-                  <View style={styles.assignmentHeader}>
-                    <Text style={styles.assignmentTitle}>Final Project</Text>
-                    <View style={styles.statusBadge}>
-                      <Text style={styles.statusText}>Upcoming</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.assignmentDueDate}>Due: May 20, 2025</Text>
-                  <TouchableOpacity style={styles.viewAssignmentButton}>
-                    <Text style={styles.viewAssignmentText}>View Details</Text>
-                  </TouchableOpacity>
-                </View>
+              <View style={styles.card}>
+                {renderAssignments()}
               </View>
             )}
-          </View>
-          
-          {/* Action Buttons */}
-          <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.actionButtonIcon}>📝</Text>
-              <Text style={styles.actionButtonText}>Request Office Hours</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.actionButtonIcon}>📞</Text>
-              <Text style={styles.actionButtonText}>Contact Instructor</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>© 2025 University Student Portal</Text>
           </View>
         </ScrollView>
       </View>
     </SafeAreaView>
   );
+};
+
+// Define default props to handle the case where props are missing
+CourseDetailPage.defaultProps = {
+  route: { params: { courseId: null } },
+  navigation: { goBack: () => console.log('Navigation not provided') }
 };
 
 const styles = StyleSheet.create({
@@ -323,6 +417,48 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     backgroundColor: '#3b5998',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#3b5998',
+  },
+  loadingText: {
+    color: 'white',
+    marginTop: 10,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#3b5998',
+    padding: 20,
+  },
+  errorText: {
+    color: 'white',
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  noContentContainer: {
+    padding: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noContentText: {
+    color: '#666',
+    fontSize: 14,
   },
   header: {
     flexDirection: 'row',
@@ -428,6 +564,36 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.8)',
     marginBottom: 2,
   },
+  attendanceRequestButton: {
+    backgroundColor: '#FFD700',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  attendanceRequestButtonLoading: {
+    backgroundColor: '#FFF59D',
+  },
+  attendanceRequestButtonSent: {
+    backgroundColor: '#8BC34A',
+  },
+  attendanceRequestButtonText: {
+    color: '#333',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  markAttendanceButton: {
+    backgroundColor: '#4CAF50',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  markAttendanceButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: 'rgba(255,255,255,0.1)',
@@ -468,10 +634,13 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   graphContainer: {
-    marginBottom: 10,
+    marginBottom: 16,
   },
   graphHeader: {
-    marginBottom: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   graphTitle: {
     fontSize: 16,
@@ -480,35 +649,35 @@ const styles = StyleSheet.create({
   },
   graph: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    height: 100,
+    height: 150,
     alignItems: 'flex-end',
+    paddingVertical: 10,
   },
   graphDayColumn: {
+    width: 40,
     alignItems: 'center',
-    width: (screenWidth - 80) / 15,
+    marginRight: 10,
   },
   graphBar: {
-    width: 8,
-    height: 70,
+    width: 20,
+    height: 100,
     borderRadius: 4,
   },
   graphDate: {
-    fontSize: 8,
+    fontSize: 10,
     color: '#666',
     marginTop: 5,
-    transform: [{ rotate: '-45deg' }],
   },
   graphStatus: {
-    fontSize: 8,
+    fontSize: 10,
     fontWeight: 'bold',
-    marginTop: 2,
+    color: '#333',
   },
   attendanceAlertContainer: {
-    marginTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 15,
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
   },
   attendanceText: {
     fontSize: 14,
@@ -516,23 +685,23 @@ const styles = StyleSheet.create({
   },
   attendancePercentage: {
     fontWeight: 'bold',
-    color: courseData.attendancePercentage < 75 ? '#FF5252' : '#4CAF50',
+    color: '#4267B2',
   },
   alertBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFEBEE',
+    backgroundColor: '#FFF3CD',
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 6,
     marginTop: 10,
   },
   alertIcon: {
     fontSize: 16,
-    marginRight: 8,
+    marginRight: 10,
   },
   alertText: {
-    fontSize: 14,
-    color: '#D32F2F',
+    fontSize: 12,
+    color: '#856404',
     flex: 1,
   },
   assignmentsContainer: {
@@ -550,147 +719,49 @@ const styles = StyleSheet.create({
   sectionSubtitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 15,
     color: '#333',
+    marginBottom: 12,
   },
   assignmentItem: {
-    backgroundColor: '#F9F9F9',
-    borderRadius: 10,
+    backgroundColor: '#f9f9f9',
     padding: 12,
+    borderRadius: 8,
     marginBottom: 10,
   },
   assignmentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: 6,
   },
   assignmentTitle: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: '#333',
     flex: 1,
   },
   statusBadge: {
-    backgroundColor: '#FF9800',
     paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
   },
   statusText: {
-    color: 'white',
     fontSize: 10,
+    color: 'white',
     fontWeight: 'bold',
   },
   assignmentDueDate: {
     fontSize: 12,
     color: '#666',
   },
-  materialsContainer: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 16,
-    marginHorizontal: 20,
-    marginTop: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  materialItem: {
-    flexDirection: 'row',
-    backgroundColor: '#F9F9F9',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 10,
+  noDataContainer: {
+    padding: 30,
     alignItems: 'center',
-  },
-  materialIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#E3F2FD',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
   },
-  materialIconText: {
-    fontSize: 20,
-  },
-  materialInfo: {
-    flex: 1,
-  },
-  materialTitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 4,
-  },
-  materialDetails: {
-    fontSize: 12,
+  noDataText: {
     color: '#666',
-  },
-  fullAssignmentsContainer: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 16,
-    marginHorizontal: 20,
-    marginTop: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  viewAssignmentButton: {
-    backgroundColor: '#f0f2f5',
-    padding: 8,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  viewAssignmentText: {
-    color: '#3b5998',
-    fontWeight: '500',
-    fontSize: 12,
-  },
-  actionButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginHorizontal: 20,
-    marginBottom: 20,
-  },
-  actionButton: {
-    backgroundColor: 'white',
-    width: '48%',
-    padding: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  actionButtonIcon: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
-  actionButtonText: {
-    color: '#3b5998',
-    fontWeight: '600',
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  footer: {
-    marginTop: 10,
-    marginBottom: 30,
-    alignItems: 'center',
-  },
-  footerText: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 12,
+    fontSize: 14,
   }
 });
 

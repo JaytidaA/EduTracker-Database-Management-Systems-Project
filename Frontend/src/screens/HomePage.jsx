@@ -474,6 +474,7 @@
 
 // export default HomePage;
 import React, {useState, useEffect} from 'react';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -491,7 +492,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuth} from "../AuthContext";
 
-// const axios = require('axios');
+const axios = require('axios');
 
 const HomePage = ({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -501,7 +502,8 @@ const HomePage = ({navigation}) => {
   const [userId, setUserId] = useState(null);
   const [userRole, setUserRole] = useState(null);
 
-
+const IP_ADDRESS="192.168.123.125"
+const PORT="3000"
 
 async function sendAttendanceMarkRequest() {
   try {

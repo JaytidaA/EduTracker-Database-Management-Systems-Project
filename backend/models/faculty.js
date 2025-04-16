@@ -30,41 +30,31 @@ function facultyCoursesData(ID) {
 	});
 }
 
-<<<<<<< HEAD
 function addFaculty(ID, name, email, isAdmin, phone, dep_ID) {
 	return new Promise((resolve, reject) => {
-		// Make sure isAdmin is a number
-		const isAdminInt = parseInt(isAdmin);
-=======
-function addFaculty (ID, name, email, isAdmin, phone, dep_ID) {
-	return new Promise ((resolve, reject) => {
-		const sql = `
-			INSERT OR IGNORE INTO Faculty (ID, facName, facEmail, facIsAdmin, facPhone, dep_ID)
-			VALUES (?, ?, ?, ?, ?, ?);
-		`
-		const params = [ID, name, email, isAdmin, phone, dep_ID];
->>>>>>> 3ecd856325e0ebc1dbf7fe2276ab497598ac4a23
+			// Convert isAdmin to integer if needed
+			const isAdminInt = isAdmin ? 1 : 0;
+			
+			const sql = `
+					INSERT OR IGNORE INTO Faculty (ID, facName, facEmail, facIsAdmin, facPhone, dep_ID)
+					VALUES (?, ?, ?, ?, ?, ?);
+			`;
+			
+			const params = [ID, name, email, isAdminInt, phone, dep_ID];
 
-		const sql = `
-			INSERT INTO Faculty (ID, facName, facEmail, facIsAdmin, facPhone, dep_ID)
-			VALUES (?, ?, ?, ?, ?, ?);
-		`;
+			db.run(sql, params, function(err) {
+					if (err) {
+							console.error(`Error inserting faculty:`, err.message);
+							return reject(err);
+					}
 
-		const params = [ID, name, email, isAdminInt, phone, dep_ID];
-
-		db.run(sql, params, function (err) {
-			if (err) {
-				console.error(`Error inserting faculty:`, err.message);
-				return reject(err);
-			}
-
-			if (this.changes === 0) {
-				console.warn(`No faculty inserted. Possibly duplicate ID: ${ID}`);
-			} else {
-				console.log(`✅ Successfully added Faculty (${ID}: ${name}). Rows inserted: ${this.changes}`);
-			}
-			resolve();
-		});
+					if (this.changes === 0) {
+							console.warn(`No faculty inserted. Possibly duplicate ID: ${ID}`);
+					} else {
+							console.log(`✅ Successfully added Faculty (${ID}: ${name}). Rows inserted: ${this.changes}`);
+					}
+					resolve();
+			});
 	});
 }
 

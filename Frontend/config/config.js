@@ -1,0 +1,4 @@
+export const configIp = {
+  IP_ADDRESS: '192.168.123.125',
+  PORT: 3000,
+};

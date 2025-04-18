@@ -56,16 +56,12 @@
 // //   getAuthState();
 // // }, []);
 
-
-
-
-
 // // const handleLogout = async () => {
 //   //   await AsyncStorage.setItem("isAuthenticated", "false");
 //   //   setIsAuthenticated(false); // 🟢 This updates context and triggers re-render
 //   //   // console.log("Saved Auth State: false");
 //   // };
-  
+
 //   const HomePage= ({navigation}) => {
 //     // const value = async () => await AsyncStorage.getItem('isAuthenticated');
 //     // const value = async () => await AsyncStorage.getItem('isAuthenticated');
@@ -86,7 +82,7 @@
 //           console.error("Error reading auth state:", error);
 //         }
 //       };
-      
+
 //       getAuthState();
 //     }, [setIsAuthenticated]);
 
@@ -112,9 +108,7 @@
 //           console.log('Error retrieving item:', error);
 //         }
 //       };
-      
-      
-      
+
 //       const handleLogout = async () => {
 //         try {
 //           await AsyncStorage.setItem("isAuthenticated", "false");
@@ -125,14 +119,14 @@
 //         }
 //       };
 //   // const d = Request();
-  
+
 //   return (
 //     <SafeAreaView style={styles.container}>
 //       <StatusBar barStyle="light-content" backgroundColor="#3b5998" />
 //       <View style={styles.background}>
 //         <ScrollView>
 //           <View style={styles.header}>
-//             {/* <Image 
+//             {/* <Image
 //               source={require('./assets/logo.png')} // Make sure to add a logo.png file to your assets folder
 //               style={styles.logo}
 //             /> */}
@@ -251,7 +245,6 @@
 //           </View>
 //         </ScrollView>
 //       </View>
-
 
 //     </SafeAreaView>
 //   );
@@ -490,57 +483,58 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useAuth} from "../AuthContext";
+import {useAuth} from '../AuthContext';
 
-const axios = require('axios');
+const {configIp} = require('../../config/config');
+
+import axios from 'axios';
 
 const HomePage = ({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [processedData, setProcessedData] = useState(null);
-  const { isAuthenticated, setIsAuthenticated } = useAuth();
+  const {isAuthenticated, setIsAuthenticated} = useAuth();
   const [userId, setUserId] = useState(null);
   const [userRole, setUserRole] = useState(null);
 
-const IP_ADDRESS="192.168.123.125"
-const PORT="3000"
+  // async function sendAttendanceMarkRequest() {
+  //   try {
+  //     console.log('I m triggered!');
+  //     const params = new URLSearchParams();
+  //     params.append('course_ID', '1');
+  //     params.append('lectureDate', '15-04-25');
+  //     params.append('lectureNumber', '1');
 
-async function sendAttendanceMarkRequest() {
-  try {
-    console.log("I m triggered!");
-    const params = new URLSearchParams();
-    params.append('course_ID', '1');
-    params.append('lectureDate', '15-04-25');
-    params.append('lectureNumber', '1');
+  //     const response = await axios.get(
+  //       `http://${configIp.IP_ADDRESS}:${configIp.PORT}/home`,
+  //       {
+  //         params: {
+  //           course_ID: 1,
+  //           lectureDate: '15-04-25',
+  //           lectureNumber: 1,
+  //         },
+  //         headers: {
+  //           'Content-Type': 'application/x-www-form-urlencoded',
+  //         },
+  //       },
+  //     );
 
-    const response = await axios.get('http://192.168.123.125:3000/mark', {
-      params: {
-        course_ID: 1,
-        lectureDate: '15-04-25',
-        lectureNumber: 1
-      },
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    });
+  //     console.log(response.data);
+  //   } catch (error) {
+  //     console.error('Error sending request:', error);
+  //   }
+  // }
 
-    console.log(response.data);
-  } catch (error) {
-    console.error('Error sending request:', error);
-  }
-}
+  // sendAttendanceMarkRequest();
 
-sendAttendanceMarkRequest();
-
-  
   useEffect(() => {
     const getAuthState = async () => {
       try {
-        const value = await AsyncStorage.getItem("isAuthenticated");
-        const storedUserId = await AsyncStorage.getItem("userId");
-        const storedUserRole = await AsyncStorage.getItem("userRole");
+        const value = await AsyncStorage.getItem('isAuthenticated');
+        const storedUserId = await AsyncStorage.getItem('userId');
+        const storedUserRole = await AsyncStorage.getItem('userRole');
 
-        if (value === "true" && storedUserId && storedUserRole) {
+        if (value === 'true' && storedUserId && storedUserRole) {
           setIsAuthenticated(true);
           setUserId(storedUserId);
           setUserRole(storedUserRole);
@@ -549,7 +543,7 @@ sendAttendanceMarkRequest();
           navigation.replace('LogIn');
         }
       } catch (error) {
-        console.error("Error reading auth state:", error);
+        console.error('Error reading auth state:', error);
       }
     };
 
@@ -580,7 +574,7 @@ sendAttendanceMarkRequest();
         phone: data.facPhone || 'Not provided',
         dep_ID: data.dep_ID || 'Not assigned',
         courses: data.courses || [],
-        isAdmin: data.facIsAdmin === 1
+        isAdmin: data.facIsAdmin === 1,
       };
     } else {
       // Student data format - assuming original structure
@@ -590,7 +584,7 @@ sendAttendanceMarkRequest();
         ID: data.ID || 'Unknown ID',
         phone: data.phone || 'Not provided',
         dep_ID: data.dep_ID || 'Not assigned',
-        courses: data.courses || []
+        courses: data.courses || [],
       };
     }
   };
@@ -598,29 +592,32 @@ sendAttendanceMarkRequest();
   const fetchUserData = async () => {
     try {
       setIsLoading(true);
-      
+
       // Get the token from AsyncStorage
       const token = await AsyncStorage.getItem('token');
-      
+
       if (!token) {
-        Alert.alert('Error', 'Authentication token not found. Please login again.');
+        Alert.alert(
+          'Error',
+          'Authentication token not found. Please login again.',
+        );
         handleLogout();
         return;
       }
-      
+
       const response = await fetch(
-        `http://192.168.123.125:3000/home?ID=${userId}&role=${userRole}`,
+        `http://${configIp.IP_ADDRESS}:${configIp.PORT}/home`,
         {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
       );
-      
+
       const result = await response.json();
-  
+
       if (result.success) {
         setUserData(result.data);
       } else {
@@ -636,23 +633,29 @@ sendAttendanceMarkRequest();
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.setItem("isAuthenticated", "false");
-      await AsyncStorage.removeItem("userId");
-      await AsyncStorage.removeItem("userRole");
-      await AsyncStorage.removeItem("token");
+      await AsyncStorage.setItem('isAuthenticated', 'false');
+      await AsyncStorage.removeItem('userId');
+      await AsyncStorage.removeItem('userRole');
+      await AsyncStorage.removeItem('token');
       setIsAuthenticated(false);
       navigation.replace('LogIn');
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.error('Error during logout:', error);
     }
   };
 
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={[styles.background, { justifyContent: 'center', alignItems: 'center' }]}>
+        <View
+          style={[
+            styles.background,
+            {justifyContent: 'center', alignItems: 'center'},
+          ]}>
           <ActivityIndicator size="large" color="white" />
-          <Text style={{ color: 'white', marginTop: 10 }}>Loading your data...</Text>
+          <Text style={{color: 'white', marginTop: 10}}>
+            Loading your data...
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -661,20 +664,31 @@ sendAttendanceMarkRequest();
   if (!processedData) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={[styles.background, { justifyContent: 'center', alignItems: 'center' }]}>
-          <Text style={{ color: 'white', fontSize: 18, textAlign: 'center', marginHorizontal: 20 }}>
+        <View
+          style={[
+            styles.background,
+            {justifyContent: 'center', alignItems: 'center'},
+          ]}>
+          <Text
+            style={{
+              color: 'white',
+              fontSize: 18,
+              textAlign: 'center',
+              marginHorizontal: 20,
+            }}>
             Could not load user data. Please try again later.
           </Text>
           <TouchableOpacity
-            style={[styles.courseButton, { marginTop: 20 }]}
-            onPress={fetchUserData}
-          >
+            style={[styles.courseButton, {marginTop: 20}]}
+            onPress={fetchUserData}>
             <Text style={styles.courseButtonText}>Retry</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.courseButton, { marginTop: 10, backgroundColor: '#d32f2f' }]}
-            onPress={handleLogout}
-          >
+            style={[
+              styles.courseButton,
+              {marginTop: 10, backgroundColor: '#d32f2f'},
+            ]}
+            onPress={handleLogout}>
             <Text style={styles.courseButtonText}>Logout</Text>
           </TouchableOpacity>
         </View>
@@ -689,14 +703,21 @@ sendAttendanceMarkRequest();
         <ScrollView>
           <View style={styles.header}>
             <Text style={styles.headerTitle}>
-              {userRole === 'student' ? 'Student Dashboard' : 'Faculty Dashboard'}
+              {userRole === 'student'
+                ? 'Student Dashboard'
+                : 'Faculty Dashboard'}
             </Text>
           </View>
 
           <View style={styles.profileCard}>
             <View style={styles.avatarContainer}>
               <Text style={styles.avatarText}>
-                {processedData.name ? processedData.name.split(' ').map(n => n[0]).join('') : '?'}
+                {processedData.name
+                  ? processedData.name
+                      .split(' ')
+                      .map(n => n[0])
+                      .join('')
+                  : '?'}
               </Text>
             </View>
             <View style={styles.profileInfo}>
@@ -718,14 +739,16 @@ sendAttendanceMarkRequest();
                 <Text style={styles.infoValue}>{processedData.email}</Text>
               </View>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>{userRole === 'student' ? 'Student Name:' : 'Faculty Name:'}</Text>
+                <Text style={styles.infoLabel}>
+                  {userRole === 'student' ? 'Student Name:' : 'Faculty Name:'}
+                </Text>
                 <Text style={styles.infoValue}>{processedData.name}</Text>
               </View>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>{userRole === 'student' ? 'Registration No:' : 'Employee ID:'}</Text>
-                <Text style={styles.infoValue}>
-                  {processedData.ID}
+                <Text style={styles.infoLabel}>
+                  {userRole === 'student' ? 'Registration No:' : 'Employee ID:'}
                 </Text>
+                <Text style={styles.infoValue}>{processedData.ID}</Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Phone:</Text>
@@ -734,7 +757,9 @@ sendAttendanceMarkRequest();
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Department:</Text>
                 <Text style={styles.infoValue}>
-                  {processedData.dep_ID ? `Department ${processedData.dep_ID}` : 'Not assigned'}
+                  {processedData.dep_ID
+                    ? `Department ${processedData.dep_ID}`
+                    : 'Not assigned'}
                 </Text>
               </View>
             </View>
@@ -761,26 +786,35 @@ sendAttendanceMarkRequest();
                   {userRole === 'student' && (
                     <View style={styles.infoRow}>
                       <Text style={styles.infoLabel}>Faculty:</Text>
-                      <Text style={styles.courseValue}>{course.facName || 'N/A'}</Text>
+                      <Text style={styles.courseValue}>
+                        {course.facName || 'N/A'}
+                      </Text>
                     </View>
                   )}
                   <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Department:</Text>
-                    <Text style={styles.courseValue}>{course.depName || 'N/A'}</Text>
+                    <Text style={styles.courseValue}>
+                      {course.depName || 'N/A'}
+                    </Text>
                   </View>
                 </View>
                 <TouchableOpacity
                   style={styles.courseButton}
-                  onPress={() => navigation.navigate('CourseDetailPage', { courseId: course.ID })}
-                >
-                  <Text style={styles.courseButtonText}>View Details</Text>
+                  onPress={() =>
+                    navigation.navigate('CourseDetailPage', {
+                      courseId: course.ID,
+                    })
+                  }>
+                  <Text style={styles.courseButtonText}>Course Details</Text>
                 </TouchableOpacity>
               </View>
             ))
           ) : (
             <View style={styles.noCourseCard}>
               <Text style={styles.noCourseText}>
-                {`No ${userRole === 'student' ? 'enrolled' : 'assigned'} courses found.`}
+                {`No ${
+                  userRole === 'student' ? 'enrolled' : 'assigned'
+                } courses found.`}
               </Text>
             </View>
           )}
@@ -788,8 +822,11 @@ sendAttendanceMarkRequest();
           {userRole === 'student' && (
             <TouchableOpacity
               style={styles.addCourseButton}
-              onPress={() => navigation.navigate('CourseDetailPage')}
-            >
+              onPress={() =>
+                navigation.navigate('CourseDetailPage', {
+                  courseId: course.ID,
+                })
+              }>
               <Text style={styles.addCourseButtonText}>+ Add New Course</Text>
             </TouchableOpacity>
           )}
@@ -799,43 +836,68 @@ sendAttendanceMarkRequest();
             <View style={styles.linksGrid}>
               {userRole === 'student' ? (
                 <>
-                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('StudentAttendanceComponent')}>
+                  <TouchableOpacity
+                    style={styles.linkCard}
+                    onPress={() =>
+                      navigation.navigate('StudentAttendanceComponent')
+                    }>
                     <Text style={styles.linkIcon}>✓</Text>
                     <Text style={styles.linkText}>Mark Attendance</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('AssignmentsPage')}>
+                  <TouchableOpacity
+                    style={styles.linkCard}
+                    onPress={() => navigation.navigate('AssignmentsPage')}>
                     <Text style={styles.linkIcon}>📝</Text>
                     <Text style={styles.linkText}>Assignments</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('GradesPage')}>
+                  <TouchableOpacity
+                    style={styles.linkCard}
+                    onPress={() => navigation.navigate('GradesPage')}>
                     <Text style={styles.linkIcon}>📊</Text>
                     <Text style={styles.linkText}>Grades</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('TeacherAttendanceComponent')}>
+                  <TouchableOpacity
+                    style={styles.linkCard}
+                    onPress={() =>
+                      navigation.navigate('TeacherAttendanceComponent')
+                    }>
                     <Text style={styles.linkIcon}>📅</Text>
                     <Text style={styles.linkText}>Schedule</Text>
                   </TouchableOpacity>
                 </>
               ) : (
                 <>
-                  <TouchableOpacity style={styles.linkCard} onPress={() => {sendAttendanceMarkRequest();navigation.navigate('TeacherAttendanceComponent')}} >
+                  <TouchableOpacity
+                    style={styles.linkCard}
+                    onPress={() => {
+                      sendAttendanceMarkRequest();
+                      navigation.navigate('TeacherAttendanceComponent');
+                    }}>
                     <Text style={styles.linkIcon}>📋</Text>
-                    <Text style={styles.linkText} >Take Attendance</Text>
+                    <Text style={styles.linkText}>Take Attendance</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('AssignmentsPage')}>
+                  <TouchableOpacity
+                    style={styles.linkCard}
+                    onPress={() => navigation.navigate('AssignmentsPage')}>
                     <Text style={styles.linkIcon}>📝</Text>
                     <Text style={styles.linkText}>Manage Assignments</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('GradingPage')}>
+                  <TouchableOpacity
+                    style={styles.linkCard}
+                    onPress={() => navigation.navigate('GradingPage')}>
                     <Text style={styles.linkIcon}>📊</Text>
                     <Text style={styles.linkText}>Grading</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('SchedulePage')}>
+                  <TouchableOpacity
+                    style={styles.linkCard}
+                    onPress={() => navigation.navigate('SchedulePage')}>
                     <Text style={styles.linkIcon}>📅</Text>
                     <Text style={styles.linkText}>My Schedule</Text>
                   </TouchableOpacity>
                   {processedData.isAdmin && (
-                    <TouchableOpacity style={styles.linkCard} onPress={() => navigation.navigate('AdminPanel')}>
+                    <TouchableOpacity
+                      style={styles.linkCard}
+                      onPress={() => navigation.navigate('AdminPanel')}>
                       <Text style={styles.linkIcon}>⚙️</Text>
                       <Text style={styles.linkText}>Admin Panel</Text>
                     </TouchableOpacity>
@@ -845,12 +907,19 @@ sendAttendanceMarkRequest();
             </View>
           </View>
 
-          <View style={{ justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: 20,
+            }}>
             <Button title="Logout" onPress={handleLogout} color="#d32f2f" />
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>© 2025 University Student Portal</Text>
+            <Text style={styles.footerText}>
+              © 2025 University Student Portal
+            </Text>
             <Text style={styles.footerText}>Version 2.5.0</Text>
           </View>
         </ScrollView>

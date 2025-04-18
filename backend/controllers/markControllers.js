@@ -38,6 +38,7 @@ async function markGetController(req, res) {
 
 	// Get data of curerntly active sessions
 	const activeSessions = await activeLectureData(ID, role);
+	console.log(activeSessions);
 	if (activeSessions.length == 0) {
 		return res.json({ success: true, activeSessions: activeSessions, message: 'No active sessions!' });
 	} else {
@@ -46,35 +47,57 @@ async function markGetController(req, res) {
 }
 
 async function markPostController(req, res) {
-	const { ID, role } = req.jwtUser;
+  const { ID, role } = req.jwtUser;
+  console.log(`Request received: User ID=${ID}, role=${role}`);
 
-	if (role == 'student') {
-		const { course_ID, lecture_Number } = req.body;
-		try {
-			await markAttendance(utility.getDateTime(), 'p', course_ID, ID, lecture_Number);
-		} catch (err) {
-			console.error(`Error while marking attendance: ${err}`)
-			return res.status(500).json({
-				success: false,
-				message: 'Internal Server Error'
-			});
-		}
+  if (role === 'student') {
+    const { course_ID, lecture_Number } = req.body;
+    try {
+      await markAttendance(utility.getDateTime(), 'p', course_ID, ID, lecture_Number);
+      console.log(`Student attendance marked: course_ID=${course_ID}, student_ID=${ID}`);
+      return res.status(200).json({ 
+        success: true, 
+        message: `Marked Attendance for Course: ${course_ID}` 
+      });
+    } catch (err) {
+      console.error(`Error while marking attendance: ${err}`);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal Server Error'
+      });
+    }
+  } else if (role === 'faculty') {
+    const { course_ID, lecture_Number } = req.body;
+    
+    if (!course_ID || !lecture_Number) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: course_ID or lecture_Number'
+      });
+    }
 
-		return res.status(200).json({ success: true, message: `Marked Attendance for Course: ${ID}` });
-	} else {
-		const { course_ID, lecture_Number } = req.body;
-		try {
-			await createLecture(course_ID, utility.getDateTime(), lecture_Number)
-		} catch (err) {
-			console.error(`Error while creating Lecture Instance : ${err}`)
-			return res.status(500).json({
-				success: false,
-				message: 'Internal Server Error'
-			});
-		}
-
-		return res.status(200).json({ success: true, message: `Created Lecture for Course: ${ID}` });
-	}
+    try {
+      console.log(`Creating lecture: course_ID=${course_ID}, date=${utility.getDateTime()}, lecture_Number=${lecture_Number}`);
+      await createLecture(course_ID, utility.getDateTime(), lecture_Number);
+      console.log(`Faculty created lecture: course_ID=${course_ID}, lecture_Number=${lecture_Number}`);
+      
+      return res.status(200).json({ 
+        success: true, 
+        message: `Created Lecture for Course: ${course_ID}` 
+      });
+    } catch (err) {
+      console.error(`Error while creating Lecture Instance: ${err}`);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal Server Error: ' + err.message
+      });
+    }
+  } else {
+    return res.status(403).json({
+      success: false,
+      message: 'Unauthorized role'
+    });
+  }
 }
 
 module.exports = {

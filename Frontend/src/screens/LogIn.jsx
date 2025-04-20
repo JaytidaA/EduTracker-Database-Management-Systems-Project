@@ -494,6 +494,8 @@ const LogIn = ({navigation}) => {
   const PORT = configIp.PORT;
 
   const handleLogin = async () => {
+    console.log("login button pressed!");
+
     if (!username || !password || !userID) {
       Alert.alert('Error', 'Please enter ID, username and password');
       return;

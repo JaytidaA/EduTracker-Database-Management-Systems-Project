@@ -313,8 +313,9 @@ import {
   ActivityIndicator
 } from 'react-native';
 
-import AttendanceScreen from './src/screens/Teacher/AttendanceScreen';
+// import AttendanceScreen from './src/screens/Teacher/AttendanceScreen';
 import TeacherSignUp from './src/screens/Teacher/TeacherSignUp';
+
 import TeacherGenerateQr from './src/screens/Teacher/TeacherGenerateQr';
 import HomePage from './src/screens/HomePage';
 import LogIn from './src/screens/LogIn';
@@ -348,7 +349,7 @@ const AppStack = () => {
     <Stack.Navigator>
       <Stack.Screen name="HomePage" component={HomePage} />
       <Stack.Screen name="TeacherSignUp" component={TeacherSignUp} />
-      <Stack.Screen name="AttendanceScreen" component={AttendanceScreen} />
+      {/* <Stack.Screen name="AttendanceScreen" component={AttendanceScreen} /> */}
       <Stack.Screen name="TeacherGenerateQr" component={TeacherGenerateQr} />
       {/* <Stack.Screen name="CourseDetailPage" component={FacultyCourseDetailPage} />
        */}

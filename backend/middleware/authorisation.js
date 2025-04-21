@@ -24,6 +24,22 @@ function authenticateToken (req, res, next) {
 	});
 }
 
+function adminAuthorisation(req, res, next) {
+	const jwtUser = req.jwtUser;
+
+	if (!jwtUser) {
+		console.error(`Incorrect order of middlewares!`)
+		return res.status(500).json({ success: false, message: 'Internal Server Error!' });
+	}
+
+	if (isUnauthorised(jwtUser)) {
+		return res.status(403).json({ success: false, message: 'Unauthorised to view this page.' })
+	}
+
+	next();
+}
+
 module.exports = {
-	jwt: authenticateToken
+	jwt: authenticateToken,
+	admin: adminAuthorisation
 }

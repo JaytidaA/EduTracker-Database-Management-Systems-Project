@@ -5,12 +5,14 @@ const loginControllers = require('../controllers/loginControllers')
 const homeControllers = require('../controllers/homeControllers')
 const attendanceControllers = require('../controllers/attendanceControllers')
 const markControllers = require('../controllers/markControllers')
+const courseControllers = require('../controllers/courseControllers')
 
 const routeSignup = express()
 const routeLogin = express()
 const routeHome = express()
 const routeAttendance = express()
 const routeMark = express()
+const routeCourse = express()
 
 routeSignup.get('/', signupControllers.get);
 routeSignup.post('/', signupControllers.post);
@@ -25,11 +27,17 @@ routeAttendance.get('/:cID', attendanceControllers.get);
 routeMark.use('/', markControllers.filter);
 routeMark.get('/', markControllers.get);
 routeMark.post('/', markControllers.post);
+routeMark.patch('/', markControllers.patch);
+
+routeCourse.get('/', courseControllers.get);
+routeCourse.post('/', courseControllers.post);
+routeCourse.patch('/:cID', courseControllers.patch);
 
 module.exports = {
 	routeSignup,
 	routeLogin,
 	routeHome,
 	routeAttendance,
-	routeMark
+	routeMark,
+	routeCourse
 }

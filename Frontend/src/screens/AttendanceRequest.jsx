@@ -1,71 +1,134 @@
-// AttendanceRequest.js
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, StatusBar } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, StatusBar, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+const { configIp } = require("../../config/config.js");
 
 const AttendanceRequest = ({ navigation, route }) => {
-  // Set initial timeout value to 15 minutes (in seconds)
-  const [timeLeft, setTimeLeft] = useState(15 * 60);
+  const [timeLeft, setTimeLeft] = useState(0);
   const [marked, setMarked] = useState(false);
-  
-  // Course information (would typically come from props/context/API)
-  const courseInfo = route.params?.courseInfo || {
-    name: 'Database Management System',
-    faculty: 'Computer Science',
-    time: new Date().toLocaleTimeString()
-  };
+  const [Coursedata, setCourseData] = useState(null);
 
-  // Timer countdown effect
+  const courseId = route.params.courseId; // 🟡 make sure you’re passing this from previous screen
+
+  useEffect(() => {
+    const setupTimer = async () => {
+      const token = await AsyncStorage.getItem('token');
+      const url = `http://${configIp.IP_ADDRESS}:${configIp.PORT}/mark`;
+
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        const now = new Date();
+
+        // ✅ Filter sessions by course_ID and within 15 minutes
+        const validSession = data.activeSessions.find(session => {
+          const lectureTime = new Date(session.lectureDate);
+          const timeDiff = (now - lectureTime) / 1000; // in seconds
+          return session.course_ID === courseId && timeDiff >= 0 && timeDiff <= 15 * 60;
+        });
+
+        if (validSession) {
+          const lectureTime = new Date(validSession.lectureDate);
+          const secondsLeft = 15 * 60 - Math.floor((now - lectureTime) / 1000);
+          setTimeLeft(secondsLeft);
+          setCourseData(validSession);
+        }
+
+      } catch (error) {
+        console.error("Error fetching sessions:", error);
+      }
+    };
+
+    setupTimer();
+  }, []);
+
   useEffect(() => {
     if (timeLeft <= 0) return;
-    
     const timer = setInterval(() => {
       setTimeLeft(prevTime => prevTime - 1);
     }, 1000);
-    
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // Format time left as minutes:seconds
   const formatTimeLeft = () => {
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
-  const handleMarkAttendance = () => {
+  const handleMarkAttendance = async () => {
+    if (timeLeft <= 0) {
+      alert("Attendance window is closed!");
+      return;
+    }
+
     setMarked(true);
-    // In a real app, you would send an API request here
+    const token = await AsyncStorage.getItem('token');
+
+    try {
+      const res = await fetch(`http://${configIp.IP_ADDRESS}:${configIp.PORT}/mark`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          course_ID: Coursedata.course_ID,
+          lecture_Number: Coursedata.lectureNumber,
+        }),
+      });
+
+      const result = await res.json();
+      if (result.success) {
+        Alert.alert("Success", "Attendance marked successfully!");
+      } else {
+        Alert.alert("Error", result.message || "Failed to mark attendance");
+      }
+    } catch (err) {
+      console.error("Error marking attendance:", err);
+    }
+
     setTimeout(() => {
       navigation.goBack();
     }, 1500);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
-      
-      <View style={styles.card}>
-        <Text style={styles.label}>course :</Text>
-        <Text style={styles.value}>{courseInfo.name}</Text>
-        
-        <Text style={styles.label}>Faculty :</Text>
-        <Text style={styles.value}>{courseInfo.faculty}</Text>
-        
-        <Text style={styles.label}>Timing :</Text>
-        <Text style={styles.value}>{courseInfo.time}</Text>
-        
-        <Text style={styles.label}>deadline : {formatTimeLeft()} mins</Text>
-        
-        <TouchableOpacity 
-          style={[styles.markButton, marked && styles.markedButton]}
-          onPress={handleMarkAttendance}
-          disabled={marked}
-        >
-          <Text style={styles.markButtonText}>{marked ? 'Marked' : 'Mark'}</Text>
-        </TouchableOpacity>
+    Coursedata && timeLeft > 0 ? (
+      <SafeAreaView style={styles.container}>
+        <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+        <View style={styles.card}>
+          <Text style={styles.label}>Faculty:</Text>
+          <Text style={styles.value}>{Coursedata.facName}</Text>
+
+          <Text style={styles.label}>Timing:</Text>
+          <Text style={styles.value}>{Coursedata.lectureDate}</Text>
+
+          <Text style={styles.label}>Deadline: {formatTimeLeft()} mins</Text>
+
+          <TouchableOpacity
+            style={[styles.markButton, marked && styles.markedButton]}
+            onPress={handleMarkAttendance}
+            disabled={marked}
+          >
+            <Text style={styles.markButtonText}>{marked ? 'Marked' : 'Mark'}</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    ) : (
+      <View style={styles.container}>
+        <Text>No Lectures Scheduled</Text>
       </View>
-    </SafeAreaView>
+    )
   );
 };
 

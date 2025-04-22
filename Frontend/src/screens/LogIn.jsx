@@ -32,7 +32,6 @@
 //   //   console.log("Saved Auth State: true");
 //   // };
 
-   
 //   useEffect(() => {
 //     const getAuthState = async () => {
 //       try {
@@ -47,7 +46,7 @@
 //     };
 //     getAuthState();
 //   }, [setIsAuthenticated]); // Add setIsAuthenticated to the dependency array
-  
+
 //   // const handleLogin = async () => {
 //   //   try {
 //   //     await AsyncStorage.setItem("isAuthenticated", "true");
@@ -63,7 +62,7 @@
 //   // const handleLogin = async () => {
 //   //   try {
 //   //     await AsyncStorage.setItem("isAuthenticated", "true");
-      
+
 //   //     // Small timeout to ensure AsyncStorage has completed
 //   //     setTimeout(() => {
 //   //       setIsAuthenticated(true);
@@ -79,10 +78,10 @@
 // //   try {
 // //     // First update AsyncStorage
 // //     await AsyncStorage.setItem("isAuthenticated", "true");
-    
+
 // //     // Then update the context state directly
 // //     setIsAuthenticated(true);
-    
+
 // //     // Add a log to confirm state change
 // //     console.log("Authentication state updated:", true);
 // //   } catch (error) {
@@ -90,13 +89,12 @@
 // //   }
 // // };
 
-
 // const handleLogin = async () => {
 //   try {
 //     await AsyncStorage.setItem("isAuthenticated", "true");
 //     setIsAuthenticated(true);
 //     console.log("Saved Auth State: true");
-    
+
 //     // Add direct navigation
 //     if (navigation) {
 //       navigation.reset({
@@ -200,10 +198,10 @@
 //       Alert.alert('Error', 'Please enter both username and password');
 //       return;
 //     }
-    
+
 //     try {
 //       setIsLoading(true);
-      
+
 //       // Replace with your actual API endpoint
 //       const response = await fetch('http://192.168.0.69:3000/login', {
 //         method: 'POST',
@@ -216,16 +214,16 @@
 //           role: userRole,
 //         }),
 //       });
-      
+
 //       const data = await response.json();
-      
+
 //       if (data.success) {
 //         // Store authentication state
 //         await AsyncStorage.setItem('isAuthenticated', 'true');
 //         // Store user ID and role
 //         await AsyncStorage.setItem('userId', data.userId.toString());
 //         await AsyncStorage.setItem('userRole', userRole);
-        
+
 //         setIsAuthenticated(true);
 //         navigation.replace('HomePage');
 //       } else {
@@ -245,14 +243,14 @@
 
 //   return (
 //     <SafeAreaView style={styles.container}>
-//       <KeyboardAvoidingView 
+//       <KeyboardAvoidingView
 //         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 //         style={styles.keyboardAvoidView}
 //       >
 //         <View style={styles.loginContainer}>
 //           <Text style={styles.title}>University Portal</Text>
 //           <Text style={styles.subtitle}>Sign in to continue</Text>
-          
+
 //           <View style={styles.form}>
 //             <View style={styles.inputContainer}>
 //               <Text style={styles.label}>Username</Text>
@@ -264,7 +262,7 @@
 //                 autoCapitalize="none"
 //               />
 //             </View>
-            
+
 //             <View style={styles.inputContainer}>
 //               <Text style={styles.label}>Password</Text>
 //               <TextInput
@@ -275,7 +273,7 @@
 //                 secureTextEntry
 //               />
 //             </View>
-            
+
 //             <View style={styles.roleToggleContainer}>
 //               <Text style={styles.label}>Login as:</Text>
 //               <View style={styles.roleButtonsContainer}>
@@ -295,7 +293,7 @@
 //                     Student
 //                   </Text>
 //                 </TouchableOpacity>
-                
+
 //                 <TouchableOpacity
 //                   style={[
 //                     styles.roleButton,
@@ -314,8 +312,8 @@
 //                 </TouchableOpacity>
 //               </View>
 //             </View>
-            
-//             <TouchableOpacity 
+
+//             <TouchableOpacity
 //               style={styles.loginButton}
 //               onPress={handleLogin}
 //               disabled={isLoading}
@@ -326,15 +324,15 @@
 //                 <Text style={styles.loginButtonText}>Login</Text>
 //               )}
 //             </TouchableOpacity>
-            
-//             <TouchableOpacity 
+
+//             <TouchableOpacity
 //               style={styles.forgotPasswordLink}
 //               onPress={() => navigation.navigate('ForgotPasswordPage')}
 //             >
 //               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
 //             </TouchableOpacity>
 //           </View>
-          
+
 //           <View style={styles.registerContainer}>
 //             <Text style={styles.registerText}>Don't have an account? </Text>
 //             <TouchableOpacity onPress={() => navigation.navigate('RegisterPage')}>
@@ -467,9 +465,7 @@
 
 // export default LogIn;
 
-
-
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -483,17 +479,19 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from '../AuthContext';
+import {useAuth} from '../AuthContext';
 
-const LogIn = ({ navigation }) => {
+const {configIp} = require('../../config/config');
+
+const LogIn = ({navigation}) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { setIsAuthenticated } = useAuth();
+  const {setIsAuthenticated} = useAuth();
   const [userRole, setUserRole] = useState('student');
   const [userID, setUserID] = useState('');
-  const IP_ADDRESS="192.168.123.125"
-const PORT="3000"
+  const IP_ADDRESS = configIp.IP_ADDRESS;
+  const PORT = configIp.PORT;
 
   const handleLogin = async () => {
     if (!username || !password || !userID) {
@@ -504,21 +502,18 @@ const PORT="3000"
     try {
       setIsLoading(true);
 
-      const response = await fetch(
-        `http://${IP_ADDRESS}:${PORT}/login`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ID: userID,
-            username: username,
-            password: password,
-            role: userRole,
-          }),
-        }
-      );
+      const response = await fetch(`http://${IP_ADDRESS}:${PORT}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ID: userID,
+          username: username,
+          password: password,
+          role: userRole,
+        }),
+      });
 
       const data = await response.json();
 
@@ -527,14 +522,14 @@ const PORT="3000"
         if (data.jwt) {
           await AsyncStorage.setItem('token', data.jwt);
         }
-    
+
         await AsyncStorage.setItem('isAuthenticated', 'true');
         await AsyncStorage.setItem('userId', userID);
         await AsyncStorage.setItem('userRole', userRole);
-    
+
         // Set authenticated state
         setIsAuthenticated(true);
-        
+
         // Navigate
         navigation.replace('HomePage');
       } else {
@@ -552,8 +547,7 @@ const PORT="3000"
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoidView}
-      >
+        style={styles.keyboardAvoidView}>
         <View style={styles.loginContainer}>
           <Text style={styles.title}>University Portal</Text>
           <Text style={styles.subtitle}>Sign in to continue</Text>
@@ -596,23 +590,31 @@ const PORT="3000"
               <Text style={styles.label}>Login as:</Text>
               <View style={styles.roleButtonsContainer}>
                 <TouchableOpacity
-                  style={[styles.roleButton, userRole === 'student' && styles.roleButtonActive]}
-                  onPress={() => setUserRole('student')}
-                >
+                  style={[
+                    styles.roleButton,
+                    userRole === 'student' && styles.roleButtonActive,
+                  ]}
+                  onPress={() => setUserRole('student')}>
                   <Text
-                    style={[styles.roleButtonText, userRole === 'student' && styles.roleButtonTextActive]}
-                  >
+                    style={[
+                      styles.roleButtonText,
+                      userRole === 'student' && styles.roleButtonTextActive,
+                    ]}>
                     Student
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.roleButton, userRole === 'faculty' && styles.roleButtonActive]}
-                  onPress={() => setUserRole('faculty')}
-                >
+                  style={[
+                    styles.roleButton,
+                    userRole === 'faculty' && styles.roleButtonActive,
+                  ]}
+                  onPress={() => setUserRole('faculty')}>
                   <Text
-                    style={[styles.roleButtonText, userRole === 'faculty' && styles.roleButtonTextActive]}
-                  >
+                    style={[
+                      styles.roleButtonText,
+                      userRole === 'faculty' && styles.roleButtonTextActive,
+                    ]}>
                     Faculty
                   </Text>
                 </TouchableOpacity>
@@ -622,8 +624,7 @@ const PORT="3000"
             <TouchableOpacity
               style={styles.loginButton}
               onPress={handleLogin}
-              disabled={isLoading}
-            >
+              disabled={isLoading}>
               {isLoading ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
@@ -633,8 +634,7 @@ const PORT="3000"
 
             <TouchableOpacity
               style={styles.forgotPasswordLink}
-              onPress={() => navigation.navigate('ForgotPasswordPage')}
-            >
+              onPress={() => navigation.navigate('ForgotPasswordPage')}>
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
           </View>
@@ -649,11 +649,10 @@ const PORT="3000"
                   Alert.alert(
                     'Access Restricted',
                     'You don’t have an account. The admin will create your account.',
-                    [{ text: 'OK' }]
+                    [{text: 'OK'}],
                   );
                 }
-              }}
-            >
+              }}>
               <Text style={styles.registerLink}>Register</Text>
             </TouchableOpacity>
           </View>

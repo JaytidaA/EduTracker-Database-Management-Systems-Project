@@ -320,6 +320,7 @@ import HomePage from './src/screens/HomePage';
 import LogIn from './src/screens/LogIn';
 import CourseDetailPage from './src/screens/CourseDetailPage';
 import StudentSignUp from './src/screens/Student/StudentSignUP';
+import AddNewCoursePage from './src/screens/Teacher/AddNewCoursePage';
 
 //yadnyesh
 import StudentAttendanceComponent from './src/screens/Student/StudentAttendance';
@@ -339,6 +340,8 @@ import AddStudentScreen from './src/screens/Student/StudentScreen';
 import TeacherAttendanceComponent from './src/screens/Teacher/TeacherAttendanceCoomponent';
 import AttendanceRequest from './src/screens/AttendanceRequest';
 import AttendanceGraph from './src/screens/AttendanceGraph';
+// import CourseDetail from './src/screens/CourseDetailPage';
+// import CourseDetailPage from './src/screens/CourseDetailPage';
 const Stack = createNativeStackNavigator();
 
 const AppStack = () => {
@@ -348,6 +351,9 @@ const AppStack = () => {
       <Stack.Screen name="TeacherSignUp" component={TeacherSignUp} />
       <Stack.Screen name="AttendanceScreen" component={AttendanceScreen} />
       <Stack.Screen name="TeacherGenerateQr" component={TeacherGenerateQr} />
+      {/* <Stack.Screen name="CourseDetailPage" component={FacultyCourseDetailPage} />
+       */}
+
       <Stack.Screen name="CourseDetailPage" component={CourseDetailPage} />
       <Stack.Screen name="StudentAttendanceComponent" component={StudentAttendanceComponent} />
       <Stack.Screen name="StudentScreen" component={AddStudentScreen} />
@@ -356,6 +362,7 @@ const AppStack = () => {
       <Stack.Screen name="LogIn" component={LogIn} />
       <Stack.Screen name="TeacherAttendanceComponent" component={TeacherAttendanceComponent}/>
       <Stack.Screen name="AttendanceRequest" component={AttendanceRequest} />
+      <Stack.Screen name="AddNewCoursePage" component={AddNewCoursePage} />
       <Stack.Screen name="AttendanceGraph" component={AttendanceGraph} />
     </Stack.Navigator>
   );

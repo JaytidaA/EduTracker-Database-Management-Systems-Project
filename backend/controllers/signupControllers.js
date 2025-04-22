@@ -33,9 +33,9 @@ function signupGetController(req, res) {
 }
 
 async function signupPostController(req, res) {
-	if (isUnauthorised(req.jwtUser)) {
-		return res.status(403).json({ success: false, message: 'Unauthorised to view this page.' })
-	}
+	// if (isUnauthorised(req.jwtUser)) {
+	// 	return res.status(403).json({ success: false, message: 'Unauthorised to view this page.' })
+	// }
 
 	// Form data is embedded in the request body, not the url queries.
 	const { username, ID, password,phone, role,isAdmin } = req.body;

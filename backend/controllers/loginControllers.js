@@ -12,8 +12,9 @@ function loginGetController (req, res) {
 }
 
 async function loginPostController(req, res) {
-	const { ID, username, password, role } = req.body;
 
+	const { ID, username, password, role } = req.body;
+console.log("mera yadu yadu");
 	if (!ID || !role) {
 		return res.json({ success: false, message: 'ID and role required!' });
 	} else if (!username || !password) {

@@ -380,6 +380,8 @@ const AuthStack = () => {
       {/* <Stack.Screen name="StudentSignUp" component={StudentSignUp} /> */}
       <Stack.Screen name="TeacherAttendanceCompnent" component={TeacherAttendanceComponent}/>
       <Stack.Screen name="StudentAttendanceComponent" component={StudentAttendanceComponent} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+
     </Stack.Navigator>
   );
 };

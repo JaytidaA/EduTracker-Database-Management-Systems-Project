@@ -74,6 +74,7 @@ async function markPatchController (req, res) {
 		const { course_ID, lecture_Number } = req.body;
 		try {
 			await markAttendance(getDateTime(), 'p', course_ID, ID, lecture_Number);
+			return res.status(201).json({ success: true, message: 'Successfully marked attendance.' })
 		} catch (err) {
 			console.error(`Error while marking attendance: ${err}`)
 			return res.status(500).json({

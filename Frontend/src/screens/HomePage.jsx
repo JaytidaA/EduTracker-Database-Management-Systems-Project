@@ -466,7 +466,7 @@
 // });
 
 // export default HomePage;
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from "react";
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
@@ -481,19 +481,19 @@ import {
   Button,
   ActivityIndicator,
   Alert,
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useAuth} from '../AuthContext';
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "../AuthContext";
 
-const {configIp} = require('../../config/config');
+const { configIp } = require("../../config/config");
 
-import axios from 'axios';
+import axios from "axios";
 
-const HomePage = ({navigation}) => {
+const HomePage = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [processedData, setProcessedData] = useState(null);
-  const {isAuthenticated, setIsAuthenticated} = useAuth();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
   const [userId, setUserId] = useState(null);
   const [userRole, setUserRole] = useState(null);
 
@@ -530,20 +530,20 @@ const HomePage = ({navigation}) => {
   useEffect(() => {
     const getAuthState = async () => {
       try {
-        const value = await AsyncStorage.getItem('isAuthenticated');
-        const storedUserId = await AsyncStorage.getItem('userId');
-        const storedUserRole = await AsyncStorage.getItem('userRole');
+        const value = await AsyncStorage.getItem("isAuthenticated");
+        const storedUserId = await AsyncStorage.getItem("userId");
+        const storedUserRole = await AsyncStorage.getItem("userRole");
 
-        if (value === 'true' && storedUserId && storedUserRole) {
+        if (value === "true" && storedUserId && storedUserRole) {
           setIsAuthenticated(true);
           setUserId(storedUserId);
           setUserRole(storedUserRole);
         } else {
           setIsAuthenticated(false);
-          navigation.replace('LogIn');
+          navigation.replace("LogIn");
         }
       } catch (error) {
-        console.error('Error reading auth state:', error);
+        console.error("Error reading auth state:", error);
       }
     };
 
@@ -566,24 +566,24 @@ const HomePage = ({navigation}) => {
 
   // Function to process user data based on role
   const processUserData = (data, role) => {
-    if (role === 'faculty') {
+    if (role === "faculty") {
       return {
-        name: data.facName || 'Unknown Faculty',
-        email: data.facEmail || 'No Email',
-        ID: data.ID || 'Unknown ID',
-        phone: data.facPhone || 'Not provided',
-        dep_ID: data.dep_ID || 'Not assigned',
+        name: data.facName || "Unknown Faculty",
+        email: data.facEmail || "No Email",
+        ID: data.ID || "Unknown ID",
+        phone: data.facPhone || "Not provided",
+        dep_ID: data.dep_ID || "Not assigned",
         courses: data.courses || [],
         isAdmin: data.facIsAdmin === 1,
       };
     } else {
       // Student data format - assuming original structure
       return {
-        name: data.name || 'Unknown Student',
-        email: data.email || 'No Email',
-        ID: data.ID || 'Unknown ID',
-        phone: data.phone || 'Not provided',
-        dep_ID: data.dep_ID || 'Not assigned',
+        name: data.name || "Unknown Student",
+        email: data.email || "No Email",
+        ID: data.ID || "Unknown ID",
+        phone: data.phone || "Not provided",
+        dep_ID: data.dep_ID || "Not assigned",
         courses: data.courses || [],
       };
     }
@@ -594,12 +594,12 @@ const HomePage = ({navigation}) => {
       setIsLoading(true);
 
       // Get the token from AsyncStorage
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem("token");
 
       if (!token) {
         Alert.alert(
-          'Error',
-          'Authentication token not found. Please login again.',
+          "Error",
+          "Authentication token not found. Please login again."
         );
         handleLogout();
         return;
@@ -608,12 +608,12 @@ const HomePage = ({navigation}) => {
       const response = await fetch(
         `http://${configIp.IP_ADDRESS}:${configIp.PORT}/home`,
         {
-          method: 'GET',
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-        },
+        }
       );
 
       const result = await response.json();
@@ -621,11 +621,11 @@ const HomePage = ({navigation}) => {
       if (result.success) {
         setUserData(result.data);
       } else {
-        Alert.alert('Error', result.message || 'Failed to fetch user data');
+        Alert.alert("Error", result.message || "Failed to fetch user data");
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
-      Alert.alert('Error', 'Network error. Please try again later.');
+      console.error("Error fetching data:", error);
+      Alert.alert("Error", "Network error. Please try again later.");
     } finally {
       setIsLoading(false);
     }
@@ -633,14 +633,14 @@ const HomePage = ({navigation}) => {
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.setItem('isAuthenticated', 'false');
-      await AsyncStorage.removeItem('userId');
-      await AsyncStorage.removeItem('userRole');
-      await AsyncStorage.removeItem('token');
+      await AsyncStorage.setItem("isAuthenticated", "false");
+      await AsyncStorage.removeItem("userId");
+      await AsyncStorage.removeItem("userRole");
+      await AsyncStorage.removeItem("token");
       setIsAuthenticated(false);
-      navigation.replace('LogIn');
+      navigation.replace("LogIn");
     } catch (error) {
-      console.error('Error during logout:', error);
+      console.error("Error during logout:", error);
     }
   };
 
@@ -650,10 +650,11 @@ const HomePage = ({navigation}) => {
         <View
           style={[
             styles.background,
-            {justifyContent: 'center', alignItems: 'center'},
-          ]}>
+            { justifyContent: "center", alignItems: "center" },
+          ]}
+        >
           <ActivityIndicator size="large" color="white" />
-          <Text style={{color: 'white', marginTop: 10}}>
+          <Text style={{ color: "white", marginTop: 10 }}>
             Loading your data...
           </Text>
         </View>
@@ -667,28 +668,32 @@ const HomePage = ({navigation}) => {
         <View
           style={[
             styles.background,
-            {justifyContent: 'center', alignItems: 'center'},
-          ]}>
+            { justifyContent: "center", alignItems: "center" },
+          ]}
+        >
           <Text
             style={{
-              color: 'white',
+              color: "white",
               fontSize: 18,
-              textAlign: 'center',
+              textAlign: "center",
               marginHorizontal: 20,
-            }}>
+            }}
+          >
             Could not load user data. Please try again later.
           </Text>
           <TouchableOpacity
-            style={[styles.courseButton, {marginTop: 20}]}
-            onPress={fetchUserData}>
+            style={[styles.courseButton, { marginTop: 20 }]}
+            onPress={fetchUserData}
+          >
             <Text style={styles.courseButtonText}>Retry</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.courseButton,
-              {marginTop: 10, backgroundColor: '#d32f2f'},
+              { marginTop: 10, backgroundColor: "#d32f2f" },
             ]}
-            onPress={handleLogout}>
+            onPress={handleLogout}
+          >
             <Text style={styles.courseButtonText}>Logout</Text>
           </TouchableOpacity>
         </View>
@@ -703,9 +708,9 @@ const HomePage = ({navigation}) => {
         <ScrollView>
           <View style={styles.header}>
             <Text style={styles.headerTitle}>
-              {userRole === 'student'
-                ? 'Student Dashboard'
-                : 'Faculty Dashboard'}
+              {userRole === "student"
+                ? "Student Dashboard"
+                : "Faculty Dashboard"}
             </Text>
           </View>
 
@@ -714,16 +719,16 @@ const HomePage = ({navigation}) => {
               <Text style={styles.avatarText}>
                 {processedData.name
                   ? processedData.name
-                      .split(' ')
-                      .map(n => n[0])
-                      .join('')
-                  : '?'}
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                  : "?"}
               </Text>
             </View>
             <View style={styles.profileInfo}>
               <Text style={styles.welcomeText}>Welcome back,</Text>
               <Text style={styles.nameText}>{processedData.name}</Text>
-              {userRole === 'faculty' && processedData.isAdmin && (
+              {userRole === "faculty" && processedData.isAdmin && (
                 <View style={styles.adminBadge}>
                   <Text style={styles.adminText}>Admin</Text>
                 </View>
@@ -740,13 +745,13 @@ const HomePage = ({navigation}) => {
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>
-                  {userRole === 'student' ? 'Student Name:' : 'Faculty Name:'}
+                  {userRole === "student" ? "Student Name:" : "Faculty Name:"}
                 </Text>
                 <Text style={styles.infoValue}>{processedData.name}</Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>
-                  {userRole === 'student' ? 'Registration No:' : 'Employee ID:'}
+                  {userRole === "student" ? "Registration No:" : "Employee ID:"}
                 </Text>
                 <Text style={styles.infoValue}>{processedData.ID}</Text>
               </View>
@@ -759,53 +764,78 @@ const HomePage = ({navigation}) => {
                 <Text style={styles.infoValue}>
                   {processedData.dep_ID
                     ? `Department ${processedData.dep_ID}`
-                    : 'Not assigned'}
+                    : "Not assigned"}
                 </Text>
               </View>
             </View>
           </View>
 
           <Text style={styles.sectionTitle}>
-            {userRole === 'student' ? 'Enrolled Courses' : 'Assigned Courses'}
+            {userRole === "student" ? "Enrolled Courses" : "Assigned Courses"}
           </Text>
 
           {processedData.courses && processedData.courses.length > 0 ? (
             processedData.courses.map((course, index) => (
-              <View key={index} style={styles.courseCard}>
-                <View style={styles.courseHeader}>
-                  <Text style={styles.courseNumber}>Course {index + 1}</Text>
-                  <View style={styles.statusBadge}>
-                    <Text style={styles.statusText}>Active</Text>
+              <View>
+                <View key={index} style={styles.courseCard}>
+                  <View style={styles.courseHeader}>
+                    <Text style={styles.courseNumber}>Course {index + 1}</Text>
+                    <View style={styles.statusBadge}>
+                      <Text style={styles.statusText}>Active</Text>
+                    </View>
                   </View>
-                </View>
-                <View style={styles.infoContainer}>
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Course Name:</Text>
-                    <Text style={styles.courseValue}>{course.courseName}</Text>
-                  </View>
-                  {userRole === 'student' && (
+                  <View style={styles.infoContainer}>
                     <View style={styles.infoRow}>
-                      <Text style={styles.infoLabel}>Faculty:</Text>
+                      <Text style={styles.infoLabel}>Course Name:</Text>
                       <Text style={styles.courseValue}>
-                        {course.facName || 'N/A'}
+                        {course.courseName}
                       </Text>
                     </View>
-                  )}
-                  <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Department:</Text>
-                    <Text style={styles.courseValue}>
-                      {course.depName || 'N/A'}
-                    </Text>
+                    {userRole === "student" && (
+                      <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>Faculty:</Text>
+                        <Text style={styles.courseValue}>
+                          {course.facName || "N/A"}
+                        </Text>
+                      </View>
+                    )}
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Department:</Text>
+                      <Text style={styles.courseValue}>
+                        {course.depName || "N/A"}
+                      </Text>
+                    </View>
                   </View>
+                  <TouchableOpacity
+                    style={styles.courseButton}
+                    onPress={() =>
+                      navigation.navigate("CourseDetailPage", {
+                        courseId: course.ID,
+                      })
+                    }
+                  >
+                    <Text style={styles.courseButtonText}>Course Details</Text>
+                  </TouchableOpacity>
                 </View>
                 <TouchableOpacity
-                  style={styles.courseButton}
-                  onPress={() =>
-                    navigation.navigate('CourseDetailPage', {
-                      courseId: course.ID,
-                    })
-                  }>
-                  <Text style={styles.courseButtonText}>Course Details</Text>
+                  style={[
+                    styles.courseButton,
+                    {
+                      marginTop: 5,
+                      marginHorizontal: 20, // Add horizontal padding to match other elements
+                      marginBottom: 15, // Add bottom margin for spacing
+                      borderWidth: 1,
+                      borderColor: "white",
+                      borderStyle: "dotted",
+                    },
+                  ]}
+                  onPress={() => {
+                    // Your navigation or action here
+                  }}
+                >
+                  <Text style={styles.courseButtonText}>
+                    Add Course Details
+                  </Text>
                 </TouchableOpacity>
               </View>
             ))
@@ -813,20 +843,21 @@ const HomePage = ({navigation}) => {
             <View style={styles.noCourseCard}>
               <Text style={styles.noCourseText}>
                 {`No ${
-                  userRole === 'student' ? 'enrolled' : 'assigned'
+                  userRole === "student" ? "enrolled" : "assigned"
                 } courses found.`}
               </Text>
             </View>
           )}
 
-          {userRole === 'student' && (
+          {userRole === "student" && (
             <TouchableOpacity
               style={styles.addCourseButton}
               onPress={() =>
-                navigation.navigate('CourseDetailPage', {
+                navigation.navigate("CourseDetailPage", {
                   courseId: course.ID,
                 })
-              }>
+              }
+            >
               <Text style={styles.addCourseButtonText}>+ Add New Course</Text>
             </TouchableOpacity>
           )}
@@ -834,33 +865,37 @@ const HomePage = ({navigation}) => {
           <View style={styles.quickLinksContainer}>
             <Text style={styles.sectionTitle}>Quick Links</Text>
             <View style={styles.linksGrid}>
-              {userRole === 'student' ? (
+              {userRole === "student" ? (
                 <>
                   <TouchableOpacity
                     style={styles.linkCard}
                     onPress={() =>
-                      navigation.navigate('StudentAttendanceComponent')
-                    }>
+                      navigation.navigate("StudentAttendanceComponent")
+                    }
+                  >
                     <Text style={styles.linkIcon}>✓</Text>
                     <Text style={styles.linkText}>Mark Attendance</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.linkCard}
-                    onPress={() => navigation.navigate('AssignmentsPage')}>
+                    onPress={() => navigation.navigate("AssignmentsPage")}
+                  >
                     <Text style={styles.linkIcon}>📝</Text>
                     <Text style={styles.linkText}>Assignments</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.linkCard}
-                    onPress={() => navigation.navigate('GradesPage')}>
+                    onPress={() => navigation.navigate("GradesPage")}
+                  >
                     <Text style={styles.linkIcon}>📊</Text>
                     <Text style={styles.linkText}>Grades</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.linkCard}
                     onPress={() =>
-                      navigation.navigate('TeacherAttendanceComponent')
-                    }>
+                      navigation.navigate("TeacherAttendanceComponent")
+                    }
+                  >
                     <Text style={styles.linkIcon}>📅</Text>
                     <Text style={styles.linkText}>Schedule</Text>
                   </TouchableOpacity>
@@ -871,33 +906,38 @@ const HomePage = ({navigation}) => {
                     style={styles.linkCard}
                     onPress={() => {
                       sendAttendanceMarkRequest();
-                      navigation.navigate('TeacherAttendanceComponent');
-                    }}>
+                      navigation.navigate("TeacherAttendanceComponent");
+                    }}
+                  >
                     <Text style={styles.linkIcon}>📋</Text>
                     <Text style={styles.linkText}>Take Attendance</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.linkCard}
-                    onPress={() => navigation.navigate('AssignmentsPage')}>
+                    onPress={() => navigation.navigate("AssignmentsPage")}
+                  >
                     <Text style={styles.linkIcon}>📝</Text>
                     <Text style={styles.linkText}>Manage Assignments</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.linkCard}
-                    onPress={() => navigation.navigate('GradingPage')}>
+                    onPress={() => navigation.navigate("GradingPage")}
+                  >
                     <Text style={styles.linkIcon}>📊</Text>
                     <Text style={styles.linkText}>Grading</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.linkCard}
-                    onPress={() => navigation.navigate('SchedulePage')}>
+                    onPress={() => navigation.navigate("SchedulePage")}
+                  >
                     <Text style={styles.linkIcon}>📅</Text>
                     <Text style={styles.linkText}>My Schedule</Text>
                   </TouchableOpacity>
                   {processedData.isAdmin && (
                     <TouchableOpacity
                       style={styles.linkCard}
-                      onPress={() => navigation.navigate('AdminPanel')}>
+                      onPress={() => navigation.navigate("AdminPanel")}
+                    >
                       <Text style={styles.linkIcon}>⚙️</Text>
                       <Text style={styles.linkText}>Admin Panel</Text>
                     </TouchableOpacity>
@@ -909,10 +949,11 @@ const HomePage = ({navigation}) => {
 
           <View
             style={{
-              justifyContent: 'center',
-              alignItems: 'center',
+              justifyContent: "center",
+              alignItems: "center",
               padding: 20,
-            }}>
+            }}
+          >
             <Button title="Logout" onPress={handleLogout} color="#d32f2f" />
           </View>
 
@@ -934,13 +975,13 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
-    backgroundColor: '#3b5998',
+    backgroundColor: "#3b5998",
     paddingTop: 10,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 16,
     paddingHorizontal: 20,
   },
@@ -951,13 +992,13 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
   profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.1)",
     marginHorizontal: 20,
     marginVertical: 10,
     padding: 15,
@@ -967,162 +1008,162 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 15,
   },
   avatarText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#3b5998',
+    fontWeight: "bold",
+    color: "#3b5998",
   },
   profileInfo: {
     flex: 1,
   },
   welcomeText: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.7)',
+    color: "rgba(255,255,255,0.7)",
   },
   nameText: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
   adminBadge: {
-    backgroundColor: '#ff9800',
+    backgroundColor: "#ff9800",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginTop: 4,
   },
   adminText: {
-    color: 'white',
+    color: "white",
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 15,
     padding: 16,
     margin: 20,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
-    color: '#333',
+    color: "#333",
   },
   infoContainer: {
     marginTop: 5,
   },
   infoRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 12,
   },
   infoLabel: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: "600",
     width: 150,
-    color: '#666',
+    color: "#666",
   },
   infoValue: {
     fontSize: 15,
     flex: 1,
-    color: '#333',
+    color: "#333",
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
     marginLeft: 20,
     marginTop: 20,
     marginBottom: 10,
   },
   courseCard: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 15,
     padding: 16,
     marginHorizontal: 20,
     marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
   noCourseCard: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: "rgba(255,255,255,0.1)",
     borderRadius: 15,
     padding: 20,
     marginHorizontal: 20,
     marginBottom: 15,
-    alignItems: 'center',
+    alignItems: "center",
   },
   noCourseText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   courseHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 10,
   },
   courseNumber: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   statusBadge: {
-    backgroundColor: '#4caf50',
+    backgroundColor: "#4caf50",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   statusText: {
-    color: 'white',
+    color: "white",
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   courseValue: {
     fontSize: 15,
     flex: 1,
-    color: '#333',
-    fontWeight: '500',
+    color: "#333",
+    fontWeight: "500",
   },
   courseButton: {
-    backgroundColor: '#3b5998',
+    backgroundColor: "#3b5998",
     padding: 10,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 12,
   },
   courseButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
   addCourseButton: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: "rgba(255,255,255,0.15)",
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
-    borderStyle: 'dashed',
+    borderColor: "rgba(255,255,255,0.3)",
+    borderStyle: "dashed",
     borderRadius: 15,
     padding: 14,
     marginHorizontal: 20,
     marginVertical: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   addCourseButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
     fontSize: 16,
   },
   quickLinksContainer: {
@@ -1130,20 +1171,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   linksGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
   },
   linkCard: {
-    backgroundColor: 'white',
-    width: '48%',
+    backgroundColor: "white",
+    width: "48%",
     padding: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
@@ -1153,20 +1194,33 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   linkText: {
-    color: '#333',
-    fontWeight: '600',
-    textAlign: 'center',
+    color: "#333",
+    fontWeight: "600",
+    textAlign: "center",
   },
   footer: {
     marginTop: 20,
     marginBottom: 30,
-    alignItems: 'center',
+    alignItems: "center",
   },
   footerText: {
-    color: 'rgba(255,255,255,0.6)',
+    color: "rgba(255,255,255,0.6)",
     fontSize: 12,
     marginBottom: 4,
   },
+  // button: {
+  //   backgroundColor: '#4CAF50', // Green color
+  //   paddingVertical: 12,
+  //   paddingHorizontal: 20,
+  //   borderRadius: 8,
+  //   alignItems: 'center',
+  //   marginTop: 20,
+  // },
+  // buttonText: {
+  //   color: '#fff',
+  //   fontSize: 16,
+  //   fontWeight: 'bold',
+  // },
 });
 
 export default HomePage;

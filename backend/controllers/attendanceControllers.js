@@ -2,7 +2,9 @@ const { lectureData, attendanceData, totalStudentAttendanceData } = require('../
 const { courseData } = require('../models/courses.js')
 
 async function attendanceGetController (req, res) {
-
+const lectures = [];
+const studentAttendance = [];
+const attendance=[];
 	const { ID, role } = req.jwtUser;
 	// .log(ID, role, courseID);
 	const courseID = req.params.cID;

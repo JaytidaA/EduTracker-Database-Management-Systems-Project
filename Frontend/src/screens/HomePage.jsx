@@ -817,7 +817,20 @@ const HomePage = ({ navigation }) => {
                     <Text style={styles.courseButtonText}>Course Details</Text>
                   </TouchableOpacity>
                 </View>
-                <TouchableOpacity
+               
+              </View>
+            ))
+          ) : (
+            <View style={styles.noCourseCard}>
+              <Text style={styles.noCourseText}>
+                {`No ${
+                  userRole === "student" ? "enrolled" : "assigned"
+                } courses found.`}
+              </Text>
+            </View>
+          )}
+          
+           <TouchableOpacity
                   style={[
                     styles.courseButton,
                     {
@@ -837,19 +850,8 @@ const HomePage = ({ navigation }) => {
                     Add Course Details
                   </Text>
                 </TouchableOpacity>
-              </View>
-            ))
-          ) : (
-            <View style={styles.noCourseCard}>
-              <Text style={styles.noCourseText}>
-                {`No ${
-                  userRole === "student" ? "enrolled" : "assigned"
-                } courses found.`}
-              </Text>
-            </View>
-          )}
 
-          {userRole === "student" && (
+          {userRole === "faculty" && (
             <TouchableOpacity
               style={styles.addCourseButton}
               onPress={() =>

@@ -1,4 +1,4 @@
-const { lectureData, attendanceData } = require('../models/attendance.js')
+const { lectureData, attendanceData, totalStudentAttendanceData } = require('../models/attendance.js')
 const { courseData } = require('../models/courses.js')
 
 async function attendanceGetController (req, res) {

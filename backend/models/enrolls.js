@@ -7,9 +7,9 @@ function enrolledStudents (ID) {
 		const sql = 'SELECT student_ID FROM Enrolls WHERE (course_ID = ?)'
 		const params = [ID]
 
-		db.get(sql, params, (err, row) => {
+		db.all(sql, params, (err, rows) => {
 			if (err) return reject(err);
-			else resolve(row);
+			else resolve(rows);
 		});
 	});
 }

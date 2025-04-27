@@ -2,6 +2,8 @@ const path = require('path')
 
 const db = require('../db/database.js')
 
+const { enrolledStudents } = require('./enrolls.js');
+
 function lectureData(courseID) {
 	return new Promise ((resolve, reject) => {
 		const sql = 'SELECT * FROM Lectures WHERE (course_ID = ?)';
@@ -92,12 +94,11 @@ function markAttendance(attendDate, attendStatus, course_ID, student_ID, lecture
 }
 
 function createLecture(course_ID, lectureDate, lectureNumber) {
-  console.log(`Creating lecture with: ${course_ID}, ${lectureDate}, ${lectureNumber}`);
-  return new Promise((resolve, reject) => {
-    const sql = `
-      INSERT INTO Lectures (course_ID, lectureDate, lectureNumber)
-      VALUES (?, ?, ?);
-    `;
+	return new Promise ((resolve, reject) => {
+		const sql = `
+			INSERT INTO Lectures (course_ID, lectureDate, lectureNumber)
+			VALUES (?, ?, ?);
+		`;
 
     const params = [course_ID, lectureDate, lectureNumber];
 
@@ -113,11 +114,60 @@ function createLecture(course_ID, lectureDate, lectureNumber) {
   });
 }
 
+function totalStudentAttendanceData(courseID, lectures) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const students = await enrolledStudents(courseID);
+			
+			if (students.length === 0) {
+				// No students enrolled
+				return resolve(1);
+			}
+
+			const data = [];
+
+			for (const student of students) {
+				const studentID = student.student_ID;
+				const attendanceRecords = await attendanceData(studentID, courseID);
+
+				// Create a map for quick lookup
+				const attendedMap = new Map();
+				for (const record of attendanceRecords) {
+					const key = `${record.lecture_Number}|${record.attendDate}`;
+					attendedMap.set(key, record.attendStatus);
+				}
+
+				const studentReport = {
+					studentID,
+					attendance: [],
+				};
+
+				for (const lecture of lectures) {
+					const key = `${lecture.lectureNumber}|${lecture.lectureDate}`;
+					const status = attendedMap.get(key) || 'a'; // Default to 'Absent' if not found
+					studentReport.attendance.push({
+						lectureNumber: lecture.lectureNumber,
+						lectureDate: lecture.lectureDate,
+						status,
+					});
+				}
+
+				data.push(studentReport);
+			}
+
+			resolve(data);
+		} catch (err) {
+			reject(err);
+		}
+	});
+}
+
 
 module.exports = {
 	lectureData,
 	attendanceData,
 	activeLectureData,
 	markAttendance,
-	createLecture
+	createLecture,
+	totalStudentAttendanceData
 };

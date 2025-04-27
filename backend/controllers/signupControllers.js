@@ -7,36 +7,13 @@ const { departmentData } = require('../models/departm.js')
 const { accountRetrievalUsername, accountSignup } = require('../models/accounts.js')
 
 const { SALT_ROUNDS } = require('../config/config.js')
-
-function isUnauthorised(jwtUser) {
-	// 0: Authorised, no error
-	// 1: Unauthorised
-
-	const { ID, role } = jwtUser;
-	if (role != 'faculty') {
-		console.log('Not faculty')
-		return 1;
-	}
-
-	const { isAdmin } = jwtUser;
-	if (!isAdmin) {
-		return 1;
-	}
-}
+const { isUnauthorised } = require('../utils/utility.js')
 
 function signupGetController(req, res) {
-	if (isUnauthorised(req.jwtUser)) {
-		return res.status(403).json({ success: false, message: 'Unauthorised to view this page.' })
-	}
-
 	res.json({ success: true, message: 'Signup page reached' })
 }
 
 async function signupPostController(req, res) {
-	// if (isUnauthorised(req.jwtUser)) {
-	// 	return res.status(403).json({ success: false, message: 'Unauthorised to view this page.' })
-	// }
-
 	// Form data is embedded in the request body, not the url queries.
 	const { username, ID, password,phone, role,isAdmin } = req.body;
 	

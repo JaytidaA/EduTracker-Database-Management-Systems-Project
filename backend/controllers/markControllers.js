@@ -1,5 +1,5 @@
 const { activeLectureData, markAttendance, createLecture } = require('../models/attendance.js');
-const { utility } = require('../config/config.js')
+const { getDateTime } = require('../utils/utility.js')
 
 function isPrivate(ip) {
 	ip = ip.replace('::ffff', '')
@@ -50,58 +50,61 @@ async function markPostController(req, res) {
   const { ID, role } = req.jwtUser;
   console.log(`Request received: User ID=${ID}, role=${role}`);
 
-  if (role === 'student') {
-    const { course_ID, lecture_Number } = req.body;
-    try {
-      await markAttendance(utility.getDateTime(), 'p', course_ID, ID, lecture_Number);
-      console.log(`Student attendance marked: course_ID=${course_ID}, student_ID=${ID}`);
-      return res.status(200).json({ 
-        success: true, 
-        message: `Marked Attendance for Course: ${course_ID}` 
-      });
-    } catch (err) {
-      console.error(`Error while marking attendance: ${err}`);
-      return res.status(500).json({
-        success: false,
-        message: 'Internal Server Error'
-      });
-    }
-  } else if (role === 'faculty') {
-    const { course_ID, lecture_Number } = req.body;
-    
-    if (!course_ID || !lecture_Number) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing required fields: course_ID or lecture_Number'
-      });
-    }
+	if (role != 'faculty') {
+		console.log(`${ID}: Unauthorised access to /mark`)
+		return res.status(403).json({ success: false, message: 'Students are unauthorised to view this page.' })
+	} else {
+		const { course_ID, lecture_Number } = req.body;
+		try {
+			await createLecture(course_ID, getDateTime(), lecture_Number)
+		} catch (err) {
+			console.error(`Error while creating Lecture Instance : ${err}`)
+			return res.status(500).json({
+				success: false,
+				message: 'Internal Server Error'
+			});
+		}
 
-    try {
-      console.log(`Creating lecture: course_ID=${course_ID}, date=${utility.getDateTime()}, lecture_Number=${lecture_Number}`);
-      await createLecture(course_ID, utility.getDateTime(), lecture_Number);
-      console.log(`Faculty created lecture: course_ID=${course_ID}, lecture_Number=${lecture_Number}`);
-      
-      return res.status(200).json({ 
-        success: true, 
-        message: `Created Lecture for Course: ${course_ID}` 
-      });
-    } catch (err) {
-      console.error(`Error while creating Lecture Instance: ${err}`);
-      return res.status(500).json({
-        success: false,
-        message: 'Internal Server Error: ' + err.message
-      });
-    }
-  } else {
-    return res.status(403).json({
-      success: false,
-      message: 'Unauthorized role'
-    });
-  }
+		return res.status(200).json({ success: true, message: `Created Lecture for Course: ${ID}` });
+	}
+}
+
+async function markPatchController (req, res) {
+	const { ID, role } = req.jwtUser;
+
+	if (role == 'student') {
+		const { course_ID, lecture_Number } = req.body;
+		try {
+			await markAttendance(getDateTime(), 'p', course_ID, ID, lecture_Number);
+		} catch (err) {
+			console.error(`Error while marking attendance: ${err}`)
+			return res.status(500).json({
+				success: false,
+				message: 'Internal Server Error'
+			});
+		}
+	} else if (role == 'faculty') {
+		const { course_ID, lecture_Number, student_ID, attend_Status } = req.body;
+		try {
+			if (attend_Status != 'a' && attend_Status != 'p') {
+				console.error(`Invalid value of attend_Status: ${attend_Status}`);
+				return res.status(400).json({ success: false, message: 'Invalid value of attend_Status provided' })
+			}
+			await markAttendance(getDateTime(), attend_Status, course_ID, student_ID, lecture_Number);
+			return res.status(200).json({ success: true, message: 'Successfully updated attendance.' })
+		} catch (err) {
+			console.error(`Error while updating attendance: ${err}`)
+			return res.status(500).json({
+				success: false,
+				message: 'Internal Server Error'
+			});
+		}
+	}
 }
 
 module.exports = {
 	filter: filterRequests,
 	get: markGetController,
-	post: markPostController
+	post: markPostController,
+	patch: markPatchController
 }

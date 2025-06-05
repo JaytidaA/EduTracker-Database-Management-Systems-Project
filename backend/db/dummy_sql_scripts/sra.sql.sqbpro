@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="" readonly="0" foreign_keys="" case_sensitive_like="" temp_store="" wal_autocheckpoint="" synchronous=""/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="1827"/><column_width id="4" width="0"/></tab_structure><tab_browse><table title="." custom_title="0" dock_id="2" table="0,0:"/><dock_state state="000000ff00000000fd00000001000000020000000000000000fc0100000002fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000000000000000fb000000160064006f0063006b00420072006f00770073006500320100000000ffffffff0000011500ffffff000000000000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1*">select * from Department;
+
+insert into Student (name, email, phone, dep_ID) VALUES
+('Jojo', 'jojo@email.com', '00000000', 1),
+('Akash', 'akash@email.com', '00000001', 2), ('Ameya', 'ameya@email.com', '00000002', 2), ('Bhavesh', 'bhavesh@email.com', '00000003', 2), ('Gaurav', 'gaurav@email.com', '00000004', 2), ('Harsh', 'harsh@email.com', '00000005', 2), ('Kartikay', 'kartikay@email.com', '00000006', 2), ('Kesar', 'kesar@email.com', '00000007', 2), ('Piyush', 'piyush@email.com', '00000008', 2), ('Prajwal', 'prajwal@email.com', '00000009', 2), ('Prithvi', 'prithvi@email.com', '00000010', 2), ('Rakshitha', 'rakshitha@email.com', '00000011', 2), ('Rohan', 'rohan@email.com', '00000012', 2), ('Rudrakshi', 'rudrakshi@email.com', '00000013', 2), ('Sarvesh', 'sarvesh@email.com', '00000014', 2), ('Shaunak', 'shaunak@email.com', '00000015', 2), ('Shaurya', 'shaurya@email.com', '00000016', 2), ('Shrivishakh', 'shrivishakh@email.com', '00000017', 2), ('Soham', 'soham@email.com', '00000018', 2), ('Suchit', 'suchit@email.com', '00000019', 2), ('Swanand', 'swanand@email.com', '00000020', 2), ('Yash', 'yash@email.com', '00000021', 2), ('Varun', 'varun@email.com', '00000022', 2), ('Vishal', 'vishal@email.com', '00000023', 2),
+('Ansh', 'ansh@email.com', '00000024', 6), ('Atharva', 'atharva@email.com', '00000025', 6), ('Sujal', 'sujal@email.com', '00000026', 6);
+
+select * from student;
+
+/* Group by number of students in a department */
+select depName, count(Student.ID) as student_count
+from Student, Department
+where Student.dep_ID = Department.ID
+group by dep_ID;
+
+/* Select the students whose name start with 'S' */
+select count(ID) as student_count_start_with_s from Student
+where Student.name like 'R%';
+
+/* Group by number of students in a department for departments with at least 5 people */
+select depName, count(Student.ID) as student_count
+from Student, Department
+where Student.dep_ID = Department.ID
+group by dep_ID
+having student_count &gt;= 5;
+
+/* Use subqueries to find out the students whose name starts with B and have Electrical Department */
+select S.ID, S.name 
+from Student as S
+where S.name like 'B%' and S.ID in (
+	select Student.ID
+	from Student, Department
+	where dep_ID = Department.ID and Department.depName = 'Electrical Engineering'
+);
+
+/* Find the departments which have students in it */
+select D.ID, D.depName
+from Student as S, Department as D
+where D.ID = S.dep_ID
+group by D.ID;
+
+/* Alternate way to write above query */
+select * from Department
+where ID in (
+	select distinct dep_ID from Student
+);
+
+/* Filter out the Departments which do not have an average student phone number (weird concept) greater than another department */
+select D.ID, D.depName, avg(S.phone)
+from Student as S, Department as D
+where D.ID = S.dep_ID
+group by D.ID
+having avg(S.phone) &gt; some(
+	select avg(phone)
+	from Student
+	group by dep_ID
+);</sql><current_tab id="0"/></tab_sql></sqlb_project>

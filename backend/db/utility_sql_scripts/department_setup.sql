@@ -11,5 +11,6 @@ VALUES
 (9, 'Mathematics'),
 (10, 'Master of Computer Applications'),
 (11, 'Physics'),
-(12, 'Technical and Applied Chemistry');
+(12, 'Technical and Applied Chemistry'),
+(13, 'Administration');
 
